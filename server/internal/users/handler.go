@@ -163,14 +163,14 @@ func (h *Handler) verifyOTP(c *gin.Context) {
 			log.Info().
 				Str("sid", *resp.Sid).
 				Msg("OTP verified successfully")
-			jwt, err := CreateJwtToken(c.Request.Context(), req.Mobile_No, *h.repo)
+			access_token, refresh_token, err := CreateJwtToken(c.Request.Context(), req.Mobile_No, *h.repo)
 			if err != nil {
 				log.Error().
 					Err(err).
 					Msg("Failed to generate token")
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
 			} else {
-				c.JSON(http.StatusOK, gin.H{"access_token": jwt})
+				c.JSON(http.StatusOK, &AuthSession{Access_Token: access_token, Refresh_Token: refresh_token})
 			}
 		} else {
 			log.Error().

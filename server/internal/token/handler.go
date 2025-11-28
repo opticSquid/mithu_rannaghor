@@ -8,13 +8,13 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func GenerateToken(userID int64, role string) (string, error) {
+func GenerateToken(userID int64, role string, expiry time.Duration) (string, error) {
 	// Implementation for generating JWT token
 	claims := AuthorizedUserJWTClaims{
 		userID,
 		role,
 		jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(10 * time.Minute)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(expiry)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			NotBefore: jwt.NewNumericDate(time.Now()),
 			Issuer:    "mithur-rannaghor.com",

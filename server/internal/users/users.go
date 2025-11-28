@@ -32,3 +32,8 @@ type verifyOTPRequest struct {
 	Mobile_No string `json:"mobile_no" binding:"required, len=10"`
 	OTP       string `json:"otp" binding:"required,len=6"`
 }
+
+type AuthSession struct {
+	Access_Token  string `json:"access_token"`
+	Refresh_Token string `json:"refresh_token"`
+}
