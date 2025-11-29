@@ -16,7 +16,7 @@ export default function TabsLayout() {
             screenOptions={{
                 headerShown: false,
                 tabBarActiveTintColor: theme.colors.primary,
-                tabBarInactiveTintColor: colors.text,
+                tabBarInactiveTintColor: theme.colors.text,
                 tabBarShowLabel: false,
                 lazy: true,
             }}
@@ -85,8 +85,8 @@ function CustomTabBar({ state, descriptors, navigation, colors }: any) {
                         >
                             <Text
                                 className={`text-center text-sm ${isFocused
-                                        ? 'font-semibold'
-                                        : 'font-normal'
+                                    ? 'font-semibold'
+                                    : 'font-normal'
                                     }`}
                                 style={{
                                     color: isFocused

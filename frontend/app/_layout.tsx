@@ -3,7 +3,7 @@ import '@/global.css';
 import { NAV_THEME } from '@/lib/theme';
 import { ThemeProvider } from '@react-navigation/native';
 import { PortalHost } from '@rn-primitives/portal';
-import { Redirect, Tabs } from 'expo-router';
+import { Redirect, Stack, Tabs } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from 'nativewind';
 
@@ -17,9 +17,11 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={NAV_THEME[colorScheme ?? 'light']}>
+      <Stack>
+        <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
+      </Stack>
       <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
       <Redirect href="/(tabs)/wallet" />
-      <Tabs screenOptions={{ headerShown: false }} />
       <PortalHost />
     </ThemeProvider>
   );
