@@ -1,4 +1,5 @@
 import { View, ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text } from '@/components/ui/text';
 import { useState, useEffect, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
@@ -109,13 +110,13 @@ export default function MenuScreen() {
     const [time, period] = timeStr.split(' ');
     const [hours, minutes] = time.split(':').map(Number);
     let totalMinutes = hours * 60 + minutes;
-    
+
     if (period === 'PM' && hours !== 12) {
       totalMinutes += 12 * 60;
     } else if (period === 'AM' && hours === 12) {
       totalMinutes -= 12 * 60;
     }
-    
+
     return totalMinutes;
   };
 
@@ -136,7 +137,7 @@ export default function MenuScreen() {
       // Get user's preferences to determine meal type based on their times
       const preferences = await loadPreferences();
       const todayPreference = preferences.find((p) => p.day === currentDay);
-      
+
       let mealTypeToShow: 'lunch' | 'dinner' = 'lunch';
       let userPref: 'veg' | 'non-veg' = 'non-veg';
 
@@ -178,71 +179,71 @@ export default function MenuScreen() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-background">
-      <View className="p-6">
-        {/* Header */}
-        <View className="mb-6">
-          <Text className="text-2xl font-bold">Today's Menu</Text>
-          <View className="mt-3 flex-row items-center justify-between rounded-lg border border-border bg-card p-3">
-            <View>
-              <Text className="text-sm text-muted-foreground">
-                {dayName} • {currentTime}
-              </Text>
-              <Text className="mt-1 text-lg font-semibold">
-                {mealType === 'lunch' ? '🍽️ Lunch' : '🍽️ Dinner'}
-              </Text>
-            </View>
-            <View className="rounded-full bg-primary px-3 py-1">
-              <Text className="text-xs font-semibold text-primary-foreground">
-                {userPreference === 'veg' ? '🥬 Veg' : '🍗 Non-Veg'}
-              </Text>
+    <SafeAreaView className="flex-1 bg-background" edges={['left', 'right', 'top']}>
+      <ScrollView className="flex-1 bg-background">
+        <View className="p-6">
+          {/* Header */}
+          <View className="mb-6">
+            <Text className="text-2xl font-bold">Today's Menu</Text>
+            <View className="mt-3 flex-row items-center justify-between rounded-lg border border-border bg-card p-3">
+              <View>
+                <Text className="text-sm text-muted-foreground">
+                  {dayName} • {currentTime}
+                </Text>
+                <Text className="mt-1 text-lg font-semibold">
+                  {mealType === 'lunch' ? '🍽️ Lunch' : '🍽️ Dinner'}
+                </Text>
+              </View>
+              <View className="rounded-full bg-primary px-3 py-1">
+                <Text className="text-xs font-semibold text-primary-foreground">
+                  {userPreference === 'veg' ? '🥬 Veg' : '🍗 Non-Veg'}
+                </Text>
+              </View>
             </View>
           </View>
-        </View>
 
-        {/* Menu Items */}
-        {currentMenu.length === 0 ? (
-          <View className="rounded-lg border border-border bg-card p-6">
-            <Text className="text-center text-muted-foreground">
-              No menu items available for your preference at this time.
-            </Text>
-          </View>
-        ) : (
-          <View className="gap-3">
-            {currentMenu.map((item) => (
-              <View key={item.id} className="rounded-lg border border-border bg-card p-4">
-                <View className="flex-row items-start justify-between">
-                  <View className="flex-1">
-                    <Text className="font-semibold">{item.name}</Text>
-                    <Text className="mt-1 text-xs text-muted-foreground">
-                      {item.description}
-                    </Text>
-                    <Text className="mt-3 text-lg font-bold text-primary">₹{item.price}</Text>
-                  </View>
-                  <View
-                    className={`rounded px-2 py-1 ${
-                      item.type === 'veg' ? 'bg-green-100 dark:bg-green-900' : 'bg-red-100 dark:bg-red-900'
-                    }`}
-                  >
-                    <Text
-                      className={`text-xs font-semibold ${
-                        item.type === 'veg'
-                          ? 'text-green-700 dark:text-green-300'
-                          : 'text-red-700 dark:text-red-300'
-                      }`}
+          {/* Menu Items */}
+          {currentMenu.length === 0 ? (
+            <View className="rounded-lg border border-border bg-card p-6">
+              <Text className="text-center text-muted-foreground">
+                No menu items available for your preference at this time.
+              </Text>
+            </View>
+          ) : (
+            <View className="gap-3">
+              {currentMenu.map((item) => (
+                <View key={item.id} className="rounded-lg border border-border bg-card p-4">
+                  <View className="flex-row items-start justify-between">
+                    <View className="flex-1">
+                      <Text className="font-semibold">{item.name}</Text>
+                      <Text className="mt-1 text-xs text-muted-foreground">
+                        {item.description}
+                      </Text>
+                      <Text className="mt-3 text-lg font-bold text-primary">₹{item.price}</Text>
+                    </View>
+                    <View
+                      className={`rounded px-2 py-1 ${item.type === 'veg' ? 'bg-green-100 dark:bg-green-900' : 'bg-red-100 dark:bg-red-900'
+                        }`}
                     >
-                      {item.type === 'veg' ? '🥬' : '🍗'}
-                    </Text>
+                      <Text
+                        className={`text-xs font-semibold ${item.type === 'veg'
+                            ? 'text-green-700 dark:text-green-300'
+                            : 'text-red-700 dark:text-red-300'
+                          }`}
+                      >
+                        {item.type === 'veg' ? '🥬' : '🍗'}
+                      </Text>
+                    </View>
                   </View>
                 </View>
-              </View>
-            ))}
-          </View>
-        )}
+              ))}
+            </View>
+          )}
 
-        {/* Refresh Button */}
-        <View className="mt-6" />
-      </View>
-    </ScrollView>
+          {/* Refresh Button */}
+          <View className="mt-6" />
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }

@@ -2,6 +2,7 @@ import { Tabs } from 'expo-router';
 import React from 'react';
 import { View, Pressable } from 'react-native';
 import { useColorScheme } from 'nativewind';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text } from '@/components/ui/text';
 import { THEME, NAV_THEME } from '@/lib/theme';
 
@@ -19,6 +20,9 @@ export default function TabsLayout() {
                 tabBarInactiveTintColor: theme.colors.text,
                 tabBarShowLabel: false,
                 lazy: true,
+                sceneContainerStyle: {
+                    backgroundColor: theme.colors.background,
+                },
             }}
             tabBar={(props) => <CustomTabBar {...props} colors={colors} />}
             initialRouteName="wallet"
