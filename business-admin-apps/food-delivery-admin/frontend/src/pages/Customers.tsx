@@ -112,7 +112,7 @@ const Customers = () => {
 };
 
 const Modal = (props: { title: string; children: any; onClose: () => void }) => (
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+    <div class="fixed inset-0 z-50 grid place-items-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
         <div class="glass w-full max-w-md p-8 shadow-2xl animate-in zoom-in duration-300">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-2xl font-bold">{props.title}</h3>
