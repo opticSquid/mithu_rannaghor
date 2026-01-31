@@ -64,9 +64,24 @@ const Billing = () => {
             const imgData = canvas.toDataURL('image/png');
             const pdf = new jsPDF('p', 'mm', 'a4');
             const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+            const pdfHeight = pdf.internal.pageSize.getHeight();
+            const imgHeight = (canvas.height * pdfWidth) / canvas.width;
 
-            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+            let heightLeft = imgHeight;
+            let position = 0;
+
+            // Add the first page
+            pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+            heightLeft -= pdfHeight;
+
+            // Add subsequent pages if content overflows
+            while (heightLeft > 0) {
+                position = position - pdfHeight; // Move image up by one page height
+                pdf.addPage();
+                pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+                heightLeft -= pdfHeight;
+            }
+
             pdf.save(`${report()?.user.name}_${startDate()}_to_${endDate()}.pdf`);
             console.log('PDF exported successfully');
         } catch (err) {
@@ -128,7 +143,7 @@ const Billing = () => {
             <Show when={report()}>
                 <div class="animate-in slide-in-from-bottom duration-500">
                     <div class="flex justify-end mb-4">
-                        <button onClick={exportPDF} class="btn bg-white/10 hover:bg-white/20 text-white">
+                        <button onClick={exportPDF} class="bg-[var(--md-sys-color-secondary-container)] text-[var(--md-sys-color-on-secondary-container)] hover:brightness-95 active:scale-95 flex items-center gap-2 rounded-xl px-6 py-3 font-medium transition-all shadow-sm hover:shadow-md">
                             <Download size={18} /> Download PDF
                         </button>
                     </div>
@@ -148,7 +163,7 @@ const Billing = () => {
                             <div class="text-right">
                                 <h2 class="text-3xl font-bold text-slate-800 uppercase tracking-tighter">Invoice</h2>
                                 <p class="text-slate-400 mt-1 font-medium">#{report()?.user.user_id}-{new Date().getTime().toString().slice(-6)}</p>
-                                <div class="mt-4 text-sm font-semibold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full inline-block">
+                                <div class="mt-4 text-sm text-center font-bold text-indigo-600 bg-indigo-50 px-4 py-2 rounded-xl whitespace-nowrap">
                                     {new Date(startDate()).toLocaleDateString()} - {new Date(endDate()).toLocaleDateString()}
                                 </div>
                             </div>

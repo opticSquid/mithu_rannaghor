@@ -84,7 +84,7 @@ const Customers = () => {
                             <div class="mt-6 flex gap-2">
                                 <button
                                     onClick={() => setShowRechargeModal(user)}
-                                    class="flex-1 btn bg-white/5 hover:bg-white/10 text-white border border-white/10"
+                                    class="flex-1 btn bg-white/5 hover:bg-white/10 text-white border border-white/10 flex items-center justify-center gap-2"
                                 >
                                     <WalletIcon size={18} /> Recharge
                                 </button>

@@ -15,10 +15,16 @@ const DailyEntry = () => {
     const [isSubmitting, setIsSubmitting] = createSignal(false);
     const [successMsg, setSuccessMsg] = createSignal(false);
 
-    onMount(async () => {
-        const res = await axios.get('/api/users');
-        setUsers(res.data || []);
-    });
+    const fetchUsers = async () => {
+        try {
+            const res = await axios.get('/api/users');
+            setUsers(res.data || []);
+        } catch (error) {
+            console.error('Failed to fetch users:', error);
+        }
+    };
+
+    onMount(fetchUsers);
 
     const handleSubmit = async (e: Event) => {
         e.preventDefault();
@@ -38,6 +44,7 @@ const DailyEntry = () => {
             });
             setSuccessMsg(true);
             setTimeout(() => setSuccessMsg(false), 3000);
+            await fetchUsers();
 
             // Reset some fields
             setMealCategory('standard');
@@ -211,9 +218,9 @@ const DailyEntry = () => {
                 </div>
             </form>
 
-            <div class={`fixed bottom-8 left-1/2 -translate-x-1/2 bg-[var(--md-sys-color-inverse-surface)] text-[var(--md-sys-color-inverse-on-surface)] px-6 py-3 rounded-full shadow-xl flex items-center gap-3 transition-all duration-300 ${successMsg() ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}>
-                <div class="bg-[#10b981] rounded-full p-1"><Check size={16} class="text-black" /></div>
-                <span class="font-medium">Meal recorded successfully</span>
+            <div class={`fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-[var(--md-sys-color-tertiary-container)] text-[var(--md-sys-color-on-tertiary-container)] border border-[var(--md-sys-color-tertiary)] px-6 py-4 rounded-full shadow-2xl flex items-center gap-3 transition-all duration-300 ${successMsg() ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}>
+                <div class="bg-[var(--md-sys-color-on-tertiary-container)] rounded-full p-1"><Check size={16} class="text-[var(--md-sys-color-tertiary-container)]" /></div>
+                <span class="font-bold tracking-wide">Meal recorded successfully</span>
             </div>
         </div>
     );
