@@ -43,7 +43,7 @@ func main() {
 
 	// Serve static files
 	workDir, _ := os.Getwd()
-	filesDir := filepath.Join(workDir, "..", "dist")
+	filesDir := filepath.Join(workDir, ".", "dist")
 	FileServer(r, "/", http.Dir(filesDir))
 
 	port := os.Getenv("PORT")

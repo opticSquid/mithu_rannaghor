@@ -12,14 +12,6 @@ import (
 var dbPool *pgxpool.Pool
 
 func initDB() {
-	host := os.Getenv("POSTGRES_HOST")
-	if host == "" {
-		host = "localhost" // fallback for local dev if not set
-	}
-	port := os.Getenv("POSTGRES_PORT")
-	if port == "" {
-		port = "5432" // fallback for local dev if not set
-	}
 	user := os.Getenv("POSTGRES_USER")
 	if user == "" {
 		user = "postgres" // fallback for local dev if not set
@@ -27,6 +19,14 @@ func initDB() {
 	password := os.Getenv("POSTGRES_PASSWORD")
 	if password == "" {
 		password = "Password" // fallback for local dev if not set
+	}
+	host := os.Getenv("POSTGRES_HOST")
+	if host == "" {
+		host = "localhost" // fallback for local dev if not set
+	}
+	port := os.Getenv("POSTGRES_PORT")
+	if port == "" {
+		port = "5432" // fallback for local dev if not set
 	}
 	dbName := os.Getenv("POSTGRES_DB")
 	if dbName == "" {
