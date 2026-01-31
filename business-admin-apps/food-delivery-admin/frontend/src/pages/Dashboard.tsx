@@ -21,7 +21,7 @@ const Dashboard = () => {
         <div class="space-y-8 animate-in fade-in duration-700">
             <header>
                 <h2 class="text-3xl font-bold text-white">Dashboard</h2>
-                <p class="text-text-dim mt-2">Welcome back to Mithu's Rannaghor Admin</p>
+                <p class="text-text-dim mt-2">Welcome back to Ranjitar Rannaghor Admin</p>
             </header>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">

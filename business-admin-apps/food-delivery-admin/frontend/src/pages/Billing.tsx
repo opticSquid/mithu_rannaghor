@@ -139,9 +139,9 @@ const Billing = () => {
                             <div>
                                 <div class="flex items-center gap-3 mb-4">
                                     <div class="w-12 h-12 bg-indigo-600 rounded-lg flex items-center justify-center">
-                                        <span class="text-white font-black text-2xl">M</span>
+                                        <span class="text-white font-black text-2xl">R</span>
                                     </div>
-                                    <h1 class="text-2xl font-black text-indigo-900 tracking-tight">MITHU'S RANNAGHOR</h1>
+                                    <h1 class="text-2xl font-black text-indigo-900 tracking-tight">Ranjitar Rannaghor</h1>
                                 </div>
                                 <p class="text-slate-500 text-sm max-w-xs">Home cooked fresh meals delivered to your doorstep. Healthy, hygienic, and tasty.</p>
                             </div>
@@ -227,7 +227,7 @@ const Billing = () => {
                         </div>
 
                         <div class="mt-20 text-center border-t border-slate-100 pt-8 opacity-40 grayscale">
-                            <p class="text-xs font-bold uppercase tracking-[0.2em] mb-2 text-slate-400">Generated via Mithu's Rannaghor Admin Panel</p>
+                            <p class="text-xs font-bold uppercase tracking-[0.2em] mb-2 text-slate-400">Generated via Ranjitar Rannaghor Admin Panel</p>
                             <p class="text-[10px] text-slate-400">Thank you for Choosing Home Cooked Goodness.</p>
                         </div>
                     </div>
