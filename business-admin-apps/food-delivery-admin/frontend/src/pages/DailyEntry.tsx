@@ -1,7 +1,7 @@
 import { createSignal, onMount, For } from 'solid-js';
 import axios from 'axios';
 import { User } from '../types';
-import { Check, Info } from 'lucide-solid';
+import { Check, Utensils, Moon, Sun, ChefHat, Salad } from 'lucide-solid';
 
 const DailyEntry = () => {
     const [users, setUsers] = createSignal<User[]>([]);
@@ -52,49 +52,54 @@ const DailyEntry = () => {
     };
 
     return (
-        <div class="max-w-2xl mx-auto animate-in slide-in-from-right duration-500">
-            <header class="mb-8">
-                <h2 class="text-3xl font-bold text-white">Daily Entry</h2>
-                <p class="text-text-dim mt-2">Record meal consumption for today</p>
+        <div class="max-w-xl mx-auto py-8 animate-in slide-in-from-bottom">
+            <header class="mb-8 text-center">
+                <h2 class="text-4xl font-black text-[var(--md-sys-color-primary)] tracking-tight">Daily Entry</h2>
+                <p class="text-[var(--md-sys-color-on-surface-variant)] mt-2 text-lg">Record today's consumption</p>
             </header>
 
-            <form onSubmit={handleSubmit} class="glass p-8 space-y-6">
-                <div class="space-y-4">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-text-dim mb-2 text-xs uppercase tracking-wider">Date</label>
-                            <input
-                                type="date"
-                                class="input"
-                                value={date()}
-                                onInput={e => setDate(e.currentTarget.value)}
-                            />
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-text-dim mb-2 text-xs uppercase tracking-wider">Shift</label>
-                            <div class="flex bg-white/5 rounded-xl p-1 gap-1">
-                                <button
-                                    type="button"
-                                    onClick={() => setMealType('lunch')}
-                                    class={`flex-1 py-1.5 rounded-lg text-sm font-medium transition-all ${mealType() === 'lunch' ? 'bg-primary text-white shadow-lg shadow-primary-glow/20' : 'text-text-dim hover:text-white'}`}
-                                >
-                                    Lunch
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setMealType('dinner')}
-                                    class={`flex-1 py-1.5 rounded-lg text-sm font-medium transition-all ${mealType() === 'dinner' ? 'bg-primary text-white shadow-lg shadow-primary-glow/20' : 'text-text-dim hover:text-white'}`}
-                                >
-                                    Dinner
-                                </button>
-                            </div>
+            <form onSubmit={handleSubmit} class="md-card flex flex-col gap-6 shadow-2xl relative overflow-hidden">
+                {/* Decorative background element */}
+                <div class="absolute top-0 right-0 w-64 h-64 bg-[var(--md-sys-color-primary)] opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+
+                {/* Date & Shift Group */}
+                <div class="flex gap-4">
+                    <div class="flex-1">
+                        <label class="text-xs font-bold text-[var(--md-sys-color-primary)] ml-4 mb-1 block tracking-wider uppercase">Date</label>
+                        <input
+                            type="date"
+                            class="input-filled"
+                            value={date()}
+                            onInput={e => setDate(e.currentTarget.value)}
+                        />
+                    </div>
+                    <div class="flex-1">
+                        <label class="text-xs font-bold text-[var(--md-sys-color-primary)] ml-4 mb-1 block tracking-wider uppercase">Shift</label>
+                        <div class="bg-[var(--md-sys-color-surface-container-highest)] rounded-full p-1 flex h-[56px] items-center">
+                            <button
+                                type="button"
+                                onClick={() => setMealType('lunch')}
+                                class={`flex-1 h-full rounded-full text-sm font-bold flex items-center justify-center gap-2 transition-all ${mealType() === 'lunch' ? 'bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] shadow-md' : 'text-[var(--md-sys-color-on-surface-variant)] hover:bg-white/5'}`}
+                            >
+                                <Sun size={16} /> Lunch
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setMealType('dinner')}
+                                class={`flex-1 h-full rounded-full text-sm font-bold flex items-center justify-center gap-2 transition-all ${mealType() === 'dinner' ? 'bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] shadow-md' : 'text-[var(--md-sys-color-on-surface-variant)] hover:bg-white/5'}`}
+                            >
+                                <Moon size={16} /> Dinner
+                            </button>
                         </div>
                     </div>
+                </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-text-dim mb-2 text-xs uppercase tracking-wider">Customer</label>
+                {/* Customer Select */}
+                <div>
+                    <label class="text-xs font-bold text-[var(--md-sys-color-primary)] ml-4 mb-1 block tracking-wider uppercase">Customer</label>
+                    <div class="relative">
                         <select
-                            class="input bg-surface"
+                            class="input-filled appearance-none cursor-pointer"
                             required
                             value={selectedUser()}
                             onInput={e => setSelectedUser(e.currentTarget.value)}
@@ -103,68 +108,63 @@ const DailyEntry = () => {
                             <For each={users()}>
                                 {(user) => (
                                     <option value={user.user_id}>
-                                        {user.name} ({user.mobile_no} / ₹{user.balance.toFixed(2)})
+                                        {user.name} • {user.role === 'admin' ? 'Admin' : 'User'} • ₹{user.balance.toFixed(0)}
                                     </option>
                                 )}
                             </For>
                         </select>
-                    </div>
-
-                    <div class="space-y-2">
-                        <label class="block text-sm font-medium text-text-dim mb-2 text-xs uppercase tracking-wider">Meal Selection</label>
-                        <div class="grid grid-cols-3 gap-3">
-                            <label
-                                class={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all cursor-pointer ${mealCategory() === 'standard' ? 'bg-primary/20 border-primary text-white shadow-lg shadow-primary-glow/20' : 'bg-white/5 border-transparent text-text-dim'
-                                    }`}
-                            >
-                                <input
-                                    type="radio"
-                                    name="category"
-                                    class="hidden"
-                                    checked={mealCategory() === 'standard'}
-                                    onChange={() => setMealCategory('standard')}
-                                />
-                                <span class="font-bold text-sm">Standard</span>
-                                <span class="text-[10px] opacity-70">₹52.50</span>
-                            </label>
-                            <label
-                                class={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all cursor-pointer ${mealCategory() === 'special' ? 'bg-indigo-500/20 border-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'bg-white/5 border-transparent text-text-dim'
-                                    }`}
-                            >
-                                <input
-                                    type="radio"
-                                    name="category"
-                                    class="hidden"
-                                    checked={mealCategory() === 'special'}
-                                    onChange={() => setMealCategory('special')}
-                                />
-                                <span class="font-bold text-sm">Special</span>
-                                <span class="text-[10px] opacity-70">₹120.00</span>
-                            </label>
-                            <label
-                                class={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all cursor-pointer ${mealCategory() === 'none' ? 'bg-slate-500/20 border-slate-500 text-white shadow-lg shadow-slate-500/20' : 'bg-white/5 border-transparent text-text-dim'
-                                    }`}
-                            >
-                                <input
-                                    type="radio"
-                                    name="category"
-                                    class="hidden"
-                                    checked={mealCategory() === 'none'}
-                                    onChange={() => setMealCategory('none')}
-                                />
-                                <span class="font-bold text-sm">None</span>
-                                <span class="text-[10px] opacity-70">Extras only</span>
-                            </label>
+                        <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--md-sys-color-on-surface-variant)]">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6" /></svg>
                         </div>
                     </div>
                 </div>
 
+                {/* Meal Selection Cards */}
+                <div>
+                    <label class="text-xs font-bold text-[var(--md-sys-color-primary)] ml-4 mb-3 block tracking-wider uppercase">Meal Type</label>
+                    <div class="grid grid-cols-3 gap-3">
+                        {/* Standard */}
+                        <label class={`relative flex flex-col items-center p-4 rounded-[20px] cursor-pointer transition-all duration-300 border-2 ${mealCategory() === 'standard'
+                            ? 'bg-[var(--md-sys-color-secondary-container)] border-[var(--md-sys-color-secondary-container)] text-[var(--md-sys-color-on-secondary-container)]'
+                            : 'border-[var(--md-sys-color-outline-variant)] text-[var(--md-sys-color-on-surface-variant)] hover:border-[var(--md-sys-color-outline)] hover:bg-[var(--md-sys-color-surface-container-high)]'
+                            }`}>
+                            <input type="radio" name="cat" class="hidden" checked={mealCategory() === 'standard'} onChange={() => setMealCategory('standard')} />
+                            <Utensils size={24} class="mb-2" />
+                            <span class="text-sm font-bold">Standard</span>
+                            <span class="text-[10px] opacity-80 mt-1">₹52.5</span>
+                        </label>
+
+                        {/* Special */}
+                        <label class={`relative flex flex-col items-center p-4 rounded-[20px] cursor-pointer transition-all duration-300 border-2 ${mealCategory() === 'special'
+                            ? 'bg-[var(--md-sys-color-tertiary-container)] border-[var(--md-sys-color-tertiary-container)] text-[var(--md-sys-color-on-tertiary-container)]'
+                            : 'border-[var(--md-sys-color-outline-variant)] text-[var(--md-sys-color-on-surface-variant)] hover:border-[var(--md-sys-color-outline)] hover:bg-[var(--md-sys-color-surface-container-high)]'
+                            }`}>
+                            <input type="radio" name="cat" class="hidden" checked={mealCategory() === 'special'} onChange={() => setMealCategory('special')} />
+                            <ChefHat size={24} class="mb-2" />
+                            <span class="text-sm font-bold">Special</span>
+                            <span class="text-[10px] opacity-80 mt-1">₹120.0</span>
+                        </label>
+
+                        {/* None */}
+                        <label class={`relative flex flex-col items-center p-4 rounded-[20px] cursor-pointer transition-all duration-300 border-2 ${mealCategory() === 'none'
+                            ? 'bg-[var(--md-sys-color-surface-variant)] border-[var(--md-sys-color-on-surface)] text-[var(--md-sys-color-on-surface)]'
+                            : 'border-[var(--md-sys-color-outline-variant)] text-[var(--md-sys-color-on-surface-variant)] hover:border-[var(--md-sys-color-outline)] hover:bg-[var(--md-sys-color-surface-container-high)]'
+                            }`}>
+                            <input type="radio" name="cat" class="hidden" checked={mealCategory() === 'none'} onChange={() => setMealCategory('none')} />
+                            <Salad size={24} class="mb-2" />
+                            <span class="text-sm font-bold">A La Carte</span>
+                            <span class="text-[10px] opacity-80 mt-1">Extras Only</span>
+                        </label>
+                    </div>
+                </div>
+
+                {/* Special Dish Input */}
                 {mealCategory() === 'special' && (
-                    <div class="space-y-4 pt-6 border-t border-white/5 animate-in fade-in slide-in-from-top-2 duration-300">
-                        <label class="block text-xs font-bold text-primary uppercase tracking-widest mb-2">Special Dish Name</label>
+                    <div class="animate-in fade-in slide-in-from-bottom duration-300">
+                        <label class="text-xs font-bold text-[var(--md-sys-color-tertiary)] ml-4 mb-1 block tracking-wider uppercase">Dish Name</label>
                         <input
-                            class="input"
-                            placeholder="e.g. Mutton Curry, Fish Special..."
+                            class="input-filled !border-b-[var(--md-sys-color-tertiary)]" // Override border color for tertiary feel
+                            placeholder="e.g. Mutton Curry..."
                             required
                             value={specialDish()}
                             onInput={e => setSpecialDish(e.currentTarget.value)}
@@ -172,43 +172,49 @@ const DailyEntry = () => {
                     </div>
                 )}
 
-                <div class="space-y-4 pt-6 border-t border-white/5">
-                    <h4 class="font-bold mb-4">A La Carte Items</h4>
-                    <div class="grid grid-cols-2 gap-6">
-                        <div class="space-y-2">
-                            <label class="text-sm text-text-dim">Extra Rice (₹10/plate)</label>
-                            <div class="flex items-center gap-3">
-                                <button type="button" onClick={() => setExtraRice(Math.max(0, extraRice() - 1))} class="w-10 h-10 glass rounded-lg flex items-center justify-center">-</button>
-                                <span class="w-8 text-center font-bold text-lg">{extraRice()}</span>
-                                <button type="button" onClick={() => setExtraRice(extraRice() + 1)} class="w-10 h-10 glass rounded-lg flex items-center justify-center">+</button>
+                {/* Extras */}
+                <div class="pt-4 border-t border-[var(--md-sys-color-outline-variant)]">
+                    <h4 class="text-sm font-bold text-[var(--md-sys-color-on-surface-variant)] mb-4 uppercase tracking-wider ml-4">Extras</h4>
+                    <div class="grid grid-cols-2 gap-4">
+                        {/* Rice */}
+                        <div class="bg-[var(--md-sys-color-surface-container-high)] p-4 rounded-2xl flex flex-col items-center">
+                            <span class="text-xs font-medium text-[var(--md-sys-color-on-surface-variant)] mb-2">Extra Rice (₹10)</span>
+                            <div class="flex items-center gap-4">
+                                <button type="button" onClick={() => setExtraRice(Math.max(0, extraRice() - 1))} class="w-10 h-10 rounded-full bg-[var(--md-sys-color-surface-container-highest)] hover:bg-[var(--md-sys-color-primary-container)] hover:text-[var(--md-sys-color-on-primary-container)] transition-colors flex items-center justify-center font-bold text-xl">-</button>
+                                <span class="text-xl font-bold w-6 text-center">{extraRice()}</span>
+                                <button type="button" onClick={() => setExtraRice(extraRice() + 1)} class="w-10 h-10 rounded-full bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] hover:opacity-90 transition-colors flex items-center justify-center font-bold text-xl">+</button>
                             </div>
                         </div>
-                        <div class="space-y-2">
-                            <label class="text-sm text-text-dim">Extra Roti (₹4/piece)</label>
-                            <div class="flex items-center gap-3">
-                                <button type="button" onClick={() => setExtraRoti(Math.max(0, extraRoti() - 1))} class="w-10 h-10 glass rounded-lg flex items-center justify-center">-</button>
-                                <span class="w-8 text-center font-bold text-lg">{extraRoti()}</span>
-                                <button type="button" onClick={() => setExtraRoti(extraRoti() + 1)} class="w-10 h-10 glass rounded-lg flex items-center justify-center">+</button>
+                        {/* Roti */}
+                        <div class="bg-[var(--md-sys-color-surface-container-high)] p-4 rounded-2xl flex flex-col items-center">
+                            <span class="text-xs font-medium text-[var(--md-sys-color-on-surface-variant)] mb-2">Extra Roti (₹4)</span>
+                            <div class="flex items-center gap-4">
+                                <button type="button" onClick={() => setExtraRoti(Math.max(0, extraRoti() - 1))} class="w-10 h-10 rounded-full bg-[var(--md-sys-color-surface-container-highest)] hover:bg-[var(--md-sys-color-primary-container)] hover:text-[var(--md-sys-color-on-primary-container)] transition-colors flex items-center justify-center font-bold text-xl">-</button>
+                                <span class="text-xl font-bold w-6 text-center">{extraRoti()}</span>
+                                <button type="button" onClick={() => setExtraRoti(extraRoti() + 1)} class="w-10 h-10 rounded-full bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] hover:opacity-90 transition-colors flex items-center justify-center font-bold text-xl">+</button>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <button
-                    type="submit"
-                    disabled={isSubmitting()}
-                    class={`btn btn-primary w-full mt-8 py-4 text-lg ${isSubmitting() ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
-                    {isSubmitting() ? 'Recording...' : 'Record Meal'}
-                </button>
-
-                {successMsg() && (
-                    <div class="mt-4 p-4 bg-success/20 border border-success/30 rounded-xl text-success flex items-center gap-2 animate-in fade-in zoom-in duration-300">
-                        <Check size={20} />
-                        Entry recorded successfully!
-                    </div>
-                )}
+                <div class="pt-2">
+                    <button
+                        type="submit"
+                        disabled={isSubmitting()}
+                        class={`btn-primary w-full h-14 text-lg rounded-[20px] relative overflow-hidden group ${isSubmitting() ? 'opacity-50' : ''}`}
+                    >
+                        <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                        <span class="relative flex items-center gap-2">
+                            {isSubmitting() ? 'Recording...' : <><Check size={20} class="stroke-[3]" /> Record Entry</>}
+                        </span>
+                    </button>
+                </div>
             </form>
+
+            <div class={`fixed bottom-8 left-1/2 -translate-x-1/2 bg-[var(--md-sys-color-inverse-surface)] text-[var(--md-sys-color-inverse-on-surface)] px-6 py-3 rounded-full shadow-xl flex items-center gap-3 transition-all duration-300 ${successMsg() ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}>
+                <div class="bg-[#10b981] rounded-full p-1"><Check size={16} class="text-black" /></div>
+                <span class="font-medium">Meal recorded successfully</span>
+            </div>
         </div>
     );
 };

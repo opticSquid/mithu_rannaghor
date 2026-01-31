@@ -1,18 +1,63 @@
 :root {
-  --primary: #6366f1;
-  --primary-glow: rgba(99, 102, 241, 0.3);
-  --secondary: #a855f7;
-  --accent: #22d3ee;
-  --background: #0f172a;
-  --surface: rgba(30, 41, 59, 0.7);
-  --surface-border: rgba(255, 255, 255, 0.1);
-  --text: #f1f5f9;
-  --text-dim: #94a3b8;
-  --success: #10b981;
-  --error: #ef4444;
-  --glass-bg: rgba(255, 255, 255, 0.03);
-  --glass-border: rgba(255, 255, 255, 0.08);
+  /* Material 3 Expressive Implementation - Dark Theme Base */
+
+  /* Primary - Indigo/Violet */
+  --md-sys-color-primary: #d0bcff;
+  --md-sys-color-on-primary: #381e72;
+  --md-sys-color-primary-container: #4f378b;
+  --md-sys-color-on-primary-container: #eaddff;
+
+  /* Secondary - Purple/Lavender */
+  --md-sys-color-secondary: #ccc2dc;
+  --md-sys-color-on-secondary: #332d41;
+  --md-sys-color-secondary-container: #4a4458;
+  --md-sys-color-on-secondary-container: #e8def8;
+
+  /* Tertiary - Pink/Rose (for accents) */
+  --md-sys-color-tertiary: #efb8c8;
+  --md-sys-color-on-tertiary: #492532;
+  --md-sys-color-tertiary-container: #633b48;
+  --md-sys-color-on-tertiary-container: #ffd8e4;
+
+  /* Error */
+  --md-sys-color-error: #f2b8b5;
+  --md-sys-color-on-error: #601410;
+  --md-sys-color-error-container: #8c1d18;
+  --md-sys-color-on-error-container: #f9dedc;
+
+  /* Surface */
+  --md-sys-color-surface: #141218;
+  --md-sys-color-surface-dim: #141218;
+  --md-sys-color-surface-bright: #3b383e;
+  --md-sys-color-surface-container-lowest: #0f0d13;
+  --md-sys-color-surface-container-low: #1d1b20;
+  --md-sys-color-surface-container: #211f26;
+  /* Main card bg */
+  --md-sys-color-surface-container-high: #2b2930;
+  --md-sys-color-surface-container-highest: #36343b;
+  /* Input bg */
+
+  /* Outline */
+  --md-sys-color-outline: #938f99;
+  --md-sys-color-outline-variant: #49454f;
+
+  /* Text */
+  --md-sys-color-on-surface: #e6e1e5;
+  --md-sys-color-on-surface-variant: #cac4d0;
+
+  /* Variables mapped for backward compatibility/utilities */
+  --primary: var(--md-sys-color-primary);
+  --background: var(--md-sys-color-surface);
+  --text: var(--md-sys-color-on-surface);
+  --text-dim: var(--md-sys-color-on-surface-variant);
+
   --font-family: 'Outfit', sans-serif;
+
+  /* Shapes */
+  --shape-corner-extra-large: 28px;
+  --shape-corner-large: 16px;
+  --shape-corner-medium: 12px;
+  --shape-corner-full: 9999px;
 }
 
 * {
@@ -23,101 +68,106 @@
 
 body {
   font-family: var(--font-family);
-  background: radial-gradient(circle at top right, #1e1b4b, #0f172a);
+  background: var(--md-sys-color-surface);
   color: var(--text);
   min-height: 100vh;
   overflow-x: hidden;
+  /* Subtle mesh gradient for depth */
+  background-image:
+    radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%),
+    radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 1) 0, transparent 50%),
+    radial-gradient(at 100% 0%, hsla(339, 49%, 30%, 1) 0, transparent 50%);
 }
 
-.glass {
-  background: var(--surface);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--surface-border);
-  border-radius: 1rem;
+/* Material 3 Card */
+.md-card {
+  background-color: var(--md-sys-color-surface-container);
+  border-radius: var(--shape-corner-extra-large);
+  padding: 24px;
+  /*  box-shadow: 0 1px 2px rgba(0,0,0,0.3); */
 }
 
-.btn {
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.75rem;
-  border: none;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+/* M3 Elevated Button */
+.btn-primary {
+  background-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+  height: 40px;
+  border-radius: var(--shape-corner-full);
+  padding: 0 24px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  box-shadow: 0 1px 3px 1px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
-  color: white;
-  box-shadow: 0 4px 15px var(--primary-glow);
+  justify-content: center;
+  gap: 8px;
 }
 
 .btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px var(--primary-glow);
-  opacity: 0.9;
+  background-color: #dcb8ff;
+  /* Slightly lighter manually or use filter */
+  box-shadow: 0 2px 4px 2px rgba(0, 0, 0, 0.2);
+}
+
+.btn-primary:active {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+}
+
+.btn-primary:disabled {
+  background-color: rgba(230, 225, 229, 0.12);
+  color: rgba(230, 225, 229, 0.38);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* M3 Filled Text Field */
+.input-filled {
+  background-color: var(--md-sys-color-surface-container-highest);
+  border-radius: 4px 4px 0 0;
+  border-bottom: 2px solid var(--md-sys-color-on-surface-variant);
+  color: var(--md-sys-color-on-surface);
+  height: 56px;
+  padding: 8px 16px 0;
+  /* Space for label */
+  font-size: 16px;
+  transition: border-bottom-color 0.2s;
+  width: 100%;
+}
+
+.input-filled:focus {
+  outline: none;
+  border-bottom-color: var(--md-sys-color-primary);
+  background-color: #403e45;
+  /* Slightly lighter state */
+}
+
+/* Keep basic glass for existing components not yet refactored */
+.glass {
+  background: var(--md-sys-color-surface-container-low);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--shape-corner-extra-large);
 }
 
 .input {
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
+  /* Legacy mapping to M3 somewhat */
+  background: var(--md-sys-color-surface-container-highest);
+  border: 1px solid transparent;
   padding: 0.75rem 1rem;
-  border-radius: 0.75rem;
+  border-radius: 8px;
   color: var(--text);
   width: 100%;
-  transition: border-color 0.2s;
+  transition: all 0.2s;
 }
 
 .input:focus {
   outline: none;
-  border-color: var(--primary);
+  border-color: var(--md-sys-color-primary);
 }
 
-select.input option {
-  background-color: #ffffff !important;
-  color: #000000 !important;
-}
-
-select.input {
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 1rem center;
-  background-size: 1.5em;
-  padding-right: 2.5rem;
-}
-
-.card {
-  padding: 1.5rem;
-  transition: transform 0.2s;
-}
-
-.card:hover {
-  transform: scale(1.01);
-}
-
-/* Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--background);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--surface-border);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--text-dim);
-}
-
-/* Invoice Utility Classes */
+/* Utilities specific to Invoice */
 .bg-invoice-white {
   background-color: #ffffff !important;
 }
@@ -150,20 +200,8 @@ select.input {
   background-color: #eef2ff !important;
 }
 
-.bg-invoice-emerald-light {
-  background-color: #ecfdf5 !important;
-}
-
-.bg-invoice-red-light {
-  background-color: #fef2f2 !important;
-}
-
-.text-invoice-emerald {
-  color: #059669 !important;
-}
-
-.text-invoice-red {
-  color: #dc2626 !important;
+.bg-invoice-subtle {
+  background-color: #f8fafc !important;
 }
 
 .border-invoice-light {
@@ -174,42 +212,19 @@ select.input {
   border-top-color: #f1f5f9 !important;
 }
 
-.bg-invoice-subtle {
-  background-color: #f8fafc !important;
-}
-
-/* Transitions & Animations */
+/* Transitions */
 .animate-in {
-  animation-duration: 0.5s;
-  animation-fill-mode: both;
-}
-
-.fade-in {
-  animation-name: fadeIn;
-}
-
-.slide-in-from-bottom {
-  animation-name: slideInFromBottom;
+  animation: fadeIn 0.5s ease-out forwards;
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
+    transform: translateY(10px);
   }
 
   to {
     opacity: 1;
-  }
-}
-
-@keyframes slideInFromBottom {
-  from {
-    transform: translateY(20px);
-    opacity: 0;
-  }
-
-  to {
     transform: translateY(0);
-    opacity: 1;
   }
 }
