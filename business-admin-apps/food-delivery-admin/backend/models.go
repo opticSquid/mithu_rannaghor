@@ -38,9 +38,10 @@ type Expense struct {
 }
 
 type RechargeRequest struct {
-	UserID int     `json:"user_id"`
-	Amount float64 `json:"amount"`
-	RefID  string  `json:"ref_id"`
+	UserID  int       `json:"user_id"`
+	Amount  float64   `json:"amount"`
+	RefID   string    `json:"ref_id"`
+	TxnDate time.Time `json:"txn_date"` // Will be stored in CREATED_AT
 }
 
 type BillReport struct {
@@ -49,6 +50,7 @@ type BillReport struct {
 	EndDate        time.Time  `json:"end_date"`
 	Logs           []DailyLog `json:"logs"`
 	TotalSpent     float64    `json:"total_spent"`
+	TotalRecharges float64    `json:"total_recharges"`
 	OpeningBalance float64    `json:"opening_balance"`
 	ClosingBalance float64    `json:"closing_balance"`
 }

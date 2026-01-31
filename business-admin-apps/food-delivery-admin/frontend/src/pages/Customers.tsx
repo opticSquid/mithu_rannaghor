@@ -197,13 +197,30 @@ const RechargeForm = (props: { user: User; onSuccess: () => void }) => {
     const [amount, setAmount] = createSignal('');
     const [refId, setRefId] = createSignal('');
 
+    // Get current datetime in local format for datetime-local input
+    const getCurrentDateTime = () => {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+    };
+
+    const [txnDateTime, setTxnDateTime] = createSignal(getCurrentDateTime());
+
     const handleSubmit = async (e: Event) => {
         e.preventDefault();
         try {
+            // Convert datetime-local value to ISO timestamp
+            const timestamp = new Date(txnDateTime()).toISOString();
+
             await axios.post('/api/wallet/recharge', {
                 user_id: props.user.user_id,
                 amount: parseFloat(amount()),
-                ref_id: refId()
+                ref_id: refId(),
+                txn_date: timestamp
             });
             props.onSuccess();
         } catch (err) {
@@ -220,6 +237,16 @@ const RechargeForm = (props: { user: User; onSuccess: () => void }) => {
                     class="input text-2xl font-bold"
                     required
                     onInput={e => setAmount(e.currentTarget.value)}
+                />
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-text-dim mb-1">Transaction Date & Time</label>
+                <input
+                    type="datetime-local"
+                    class="input"
+                    required
+                    value={txnDateTime()}
+                    onInput={e => setTxnDateTime(e.currentTarget.value)}
                 />
             </div>
             <div>

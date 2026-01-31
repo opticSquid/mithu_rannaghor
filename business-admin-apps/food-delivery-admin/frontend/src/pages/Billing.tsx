@@ -182,7 +182,7 @@ const Billing = () => {
                                 <div class="space-y-1">
                                     <p class="text-slate-500">Opening Balance: <span class="text-slate-800 font-bold">₹{report()?.opening_balance.toFixed(2)}</span></p>
                                     <p class="text-slate-500">Total Billable: <span class="text-slate-800 font-bold">₹{report()?.total_spent.toFixed(2)}</span></p>
-                                    <p class="text-slate-500">Recharges: <span class="text-slate-800 font-bold">₹{(report()!.closing_balance - (report()!.opening_balance - report()!.total_spent)).toFixed(2)}</span></p>
+                                    <p class="text-slate-500">Recharges: <span class="text-slate-800 font-bold">₹{report()?.total_recharges.toFixed(2)}</span></p>
                                 </div>
                             </div>
                         </div>

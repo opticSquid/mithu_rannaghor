@@ -94,12 +94,18 @@ func rechargeWallet(w http.ResponseWriter, r *http.Request) {
 	}
 	defer tx.Rollback(context.Background())
 
+	// Use provided date or default to now
+	txnDate := req.TxnDate
+	if txnDate.IsZero() {
+		txnDate = time.Now()
+	}
+
 	var txnID int
 	err = tx.QueryRow(context.Background(), `
-		INSERT INTO WALLET_TRANSACTIONS (USER_ID, TXN_TYPE, STATUS, AMOUNT, REFERENCE_ID) 
-		VALUES ($1, 'recharge', 'pending_acknowledgement', $2, $3) 
+		INSERT INTO WALLET_TRANSACTIONS (USER_ID, TXN_TYPE, STATUS, AMOUNT, REFERENCE_ID, CREATED_AT) 
+		VALUES ($1, 'recharge', 'pending_acknowledgement', $2, $3, $4) 
 		RETURNING TXN_ID
-	`, req.UserID, req.Amount, req.RefID).Scan(&txnID)
+	`, req.UserID, req.Amount, req.RefID, txnDate).Scan(&txnID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -425,19 +431,38 @@ func getBill(w http.ResponseWriter, r *http.Request) {
 
 	// Closing balance is current balance
 	report.ClosingBalance = report.User.Balance
-	// Opening balance = ClosingBalance + TotalSpent - TotalRechargesInRange
-	// For simplicity, let's just calculate it this way or return Current Balance as is.
-	// Actually, Opening Balance should be balance at the start of the date range.
-	// Let's just calculate Opening Balance as report.ClosingBalance + report.TotalSpent for now (assuming no recharges in between)
-	// Proper way would be (Current Balance) - (Sum of TXNs after StartDate)
-	var sumTXNAfter float64
-	dbPool.QueryRow(context.Background(), `
-		SELECT COALESCE(SUM(CASE WHEN TXN_TYPE = 'recharge' THEN AMOUNT ELSE -AMOUNT END), 0) 
-		FROM WALLET_TRANSACTIONS 
-		WHERE USER_ID = $1 AND CREATED_AT >= $2
-	`, userID, startDate).Scan(&sumTXNAfter)
 
-	report.OpeningBalance = report.ClosingBalance - sumTXNAfter
+	// Calculate total recharges during billing period
+	dbPool.QueryRow(context.Background(), `
+		SELECT COALESCE(SUM(AMOUNT), 0)
+		FROM WALLET_TRANSACTIONS
+		WHERE USER_ID = $1
+		  AND TXN_TYPE = 'recharge'
+		  AND STATUS = 'confirmed'
+		  AND CREATED_AT >= $2
+		  AND CREATED_AT <= $3
+	`, userID, startDate, endDate.AddDate(0, 0, 1)).Scan(&report.TotalRecharges)
+
+	// Opening balance = Balance before the billing period started
+	// Get the BALANCE_AFTER from the last confirmed transaction before the start date
+	// If no transactions exist before start date, opening balance is 0
+	var openingBalance *float64
+	err = dbPool.QueryRow(context.Background(), `
+		SELECT BALANCE_AFTER
+		FROM WALLET_TRANSACTIONS
+		WHERE USER_ID = $1
+		  AND STATUS = 'confirmed'
+		  AND CREATED_AT < $2
+		ORDER BY CREATED_AT DESC, TXN_ID DESC
+		LIMIT 1
+	`, userID, startDate).Scan(&openingBalance)
+
+	if err != nil || openingBalance == nil {
+		// No transactions before start date, opening balance is 0
+		report.OpeningBalance = 0
+	} else {
+		report.OpeningBalance = *openingBalance
+	}
 
 	json.NewEncoder(w).Encode(report)
 }

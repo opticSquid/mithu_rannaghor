@@ -37,6 +37,7 @@ export interface BillReport {
     end_date: string;
     logs: DailyLog[];
     total_spent: number;
+    total_recharges: number;
     opening_balance: number;
     closing_balance: number;
 }
