@@ -29,6 +29,14 @@ type DailyLog struct {
 	TotalCost       float64   `json:"total_cost"`
 }
 
+type Expense struct {
+	ExpenseID   int       `json:"expense_id"`
+	ExpenseDate time.Time `json:"expense_date"`
+	Reason      string    `json:"reason"`
+	Amount      float64   `json:"amount"`
+	CreatedAt   time.Time `json:"created_at"`
+}
+
 type RechargeRequest struct {
 	UserID int     `json:"user_id"`
 	Amount float64 `json:"amount"`
@@ -43,4 +51,29 @@ type BillReport struct {
 	TotalSpent     float64    `json:"total_spent"`
 	OpeningBalance float64    `json:"opening_balance"`
 	ClosingBalance float64    `json:"closing_balance"`
+}
+
+type DashboardStats struct {
+	TotalRevenue    float64 `json:"total_revenue"`
+	TotalExpenses   float64 `json:"total_expenses"`
+	NetProfit       float64 `json:"net_profit"`
+	MonthlyRevenue  float64 `json:"monthly_revenue"`
+	MonthlyExpenses float64 `json:"monthly_expenses"`
+	ActiveCustomers int     `json:"active_customers"`
+	WalletPool      float64 `json:"wallet_pool"`
+}
+
+type TrendPoint struct {
+	Date     string  `json:"date"`
+	Revenue  float64 `json:"revenue"`
+	Expenses float64 `json:"expenses"`
+}
+
+type AnalyticsStats struct {
+	Trends           []TrendPoint   `json:"trends"`
+	MealTypes        map[string]int `json:"meal_types"`
+	Shifts           map[string]int `json:"shifts"`
+	TotalRevenue     float64        `json:"total_revenue"`
+	TotalExpenses    float64        `json:"total_expenses"`
+	ProfitPercentage float64        `json:"profit_percentage"`
 }

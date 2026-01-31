@@ -1,21 +1,24 @@
 import { createSignal, onMount, For } from 'solid-js';
 import axios from 'axios';
-import { User } from '../types';
-import { TrendingUp, Users, Wallet, Calendar } from 'lucide-solid';
+import { User, DashboardStats } from '../types';
+import { Users, ArrowDownCircle, ArrowUpCircle, IndianRupee } from 'lucide-solid';
 
 const Dashboard = () => {
     const [users, setUsers] = createSignal<User[]>([]);
+    const [stats, setStats] = createSignal<DashboardStats | null>(null);
 
     onMount(async () => {
         try {
-            const res = await axios.get('/api/users');
-            setUsers(res.data || []);
+            const [usersRes, statsRes] = await Promise.all([
+                axios.get('/api/users'),
+                axios.get('/api/dashboard/stats')
+            ]);
+            setUsers(usersRes.data || []);
+            setStats(statsRes.data);
         } catch (err) {
             console.error(err);
         }
     });
-
-    const totalBalance = () => users().reduce((acc, u) => acc + u.balance, 0);
 
     return (
         <div class="space-y-8 animate-in fade-in duration-700">
@@ -24,27 +27,34 @@ const Dashboard = () => {
                 <p class="text-text-dim mt-2">Welcome back to Ranjitar Rannaghor Admin</p>
             </header>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatCard
                     icon={Users}
-                    label="Total Customers"
-                    value={users().length.toString()}
-                    trend="+2 this week"
+                    label="Active Customers"
+                    value={stats()?.active_customers.toString() || '0'}
+                    trend="Total Subscribers"
                     color="from-blue-500 to-cyan-400"
                 />
                 <StatCard
-                    icon={Wallet}
-                    label="Wallet Pool"
-                    value={`₹${totalBalance().toLocaleString()}`}
-                    trend="Real-time"
-                    color="from-purple-500 to-indigo-400"
+                    icon={ArrowUpCircle}
+                    label="Monthly Revenue"
+                    value={`₹${stats()?.monthly_revenue.toLocaleString('en-IN') || '0'}`}
+                    trend="This Month"
+                    color="from-emerald-500 to-teal-400"
                 />
                 <StatCard
-                    icon={TrendingUp}
-                    label="Avg Sales / Day"
-                    value="₹1,250"
-                    trend="+12%"
-                    color="from-emerald-500 to-teal-400"
+                    icon={ArrowDownCircle}
+                    label="Monthly Expenses"
+                    value={`₹${stats()?.monthly_expenses.toLocaleString('en-IN') || '0'}`}
+                    trend="This Month"
+                    color="from-rose-500 to-orange-400"
+                />
+                <StatCard
+                    icon={IndianRupee}
+                    label="Net Profit"
+                    value={`₹${stats()?.net_profit.toLocaleString('en-IN') || '0'}`}
+                    trend="All Time"
+                    color="from-purple-500 to-indigo-400"
                 />
             </div>
 

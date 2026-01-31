@@ -3,7 +3,9 @@ import {
     FileText,
     LayoutDashboard,
     PlusCircle,
-    Users
+    Users,
+    BarChart3,
+    Wallet
 } from 'lucide-solid';
 import { type ParentComponent } from 'solid-js';
 
@@ -26,6 +28,8 @@ const App: ParentComponent = (props) => {
                     <NavItem href="/customers" icon={Users} label="Customers" active={location.pathname === '/customers'} />
                     <NavItem href="/daily-entry" icon={PlusCircle} label="Daily Entry" active={location.pathname === '/daily-entry'} />
                     <NavItem href="/billing" icon={FileText} label="Generate Bill" active={location.pathname === '/billing'} />
+                    <NavItem href="/expenses" icon={Wallet} label="Expenses" active={location.pathname === '/expenses'} />
+                    <NavItem href="/analytics" icon={BarChart3} label="Analytics" active={location.pathname === '/analytics'} />
                 </nav>
 
                 <div class="p-4 border-t border-surface-border">

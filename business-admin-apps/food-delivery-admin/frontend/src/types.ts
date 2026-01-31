@@ -23,6 +23,14 @@ export interface DailyLog {
     total_cost: number;
 }
 
+export interface Expense {
+    expense_id: number;
+    expense_date: string;
+    reason: string;
+    amount: number;
+    created_at: string;
+}
+
 export interface BillReport {
     user: User;
     start_date: string;
@@ -31,4 +39,29 @@ export interface BillReport {
     total_spent: number;
     opening_balance: number;
     closing_balance: number;
+}
+
+export interface DashboardStats {
+    total_revenue: number;
+    total_expenses: number;
+    net_profit: number;
+    monthly_revenue: number;
+    monthly_expenses: number;
+    active_customers: number;
+    wallet_pool: number;
+}
+
+export interface TrendPoint {
+    date: string;
+    revenue: number;
+    expenses: number;
+}
+
+export interface AnalyticsStats {
+    trends: TrendPoint[];
+    meal_types: { [key: string]: number };
+    shifts: { [key: string]: number };
+    total_revenue: number;
+    total_expenses: number;
+    profit_percentage: number;
 }

@@ -28,5 +28,19 @@ func initDB() {
 	if err != nil {
 		log.Fatalf("Unable to ping database: %v\n", err)
 	}
+	// Create tables if they don't exist
+	_, err = dbPool.Exec(context.Background(), `
+		CREATE TABLE IF NOT EXISTS EXPENSES (
+            EXPENSE_ID SERIAL PRIMARY KEY,
+            EXPENSE_DATE DATE NOT NULL,
+            REASON TEXT NOT NULL,
+            AMOUNT DECIMAL(10,2) NOT NULL,
+            CREATED_AT TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+	`)
+	if err != nil {
+		log.Fatalf("Unable to create tables: %v\n", err)
+	}
+
 	log.Println("Connected to database successfully")
 }
