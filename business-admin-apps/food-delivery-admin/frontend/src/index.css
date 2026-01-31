@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   /* Material 3 Expressive Implementation - Dark Theme Base */
 
@@ -58,12 +62,6 @@
   --shape-corner-large: 16px;
   --shape-corner-medium: 12px;
   --shape-corner-full: 9999px;
-}
-
-* {
-  box-sizing: border-box;
-  margin: 0px;
-  padding: 2px;
 }
 
 body {
@@ -165,51 +163,6 @@ body {
 .input:focus {
   outline: none;
   border-color: var(--md-sys-color-primary);
-}
-
-/* Utilities specific to Invoice */
-.bg-invoice-white {
-  background-color: #ffffff !important;
-}
-
-.text-invoice-dark {
-  color: #1e293b !important;
-}
-
-.text-invoice-gray {
-  color: #64748b !important;
-}
-
-.text-invoice-light {
-  color: #94a3b8 !important;
-}
-
-.text-invoice-indigo {
-  color: #4f46e5 !important;
-}
-
-.text-invoice-indigo-dark {
-  color: #312e81 !important;
-}
-
-.bg-invoice-indigo {
-  background-color: #4f46e5 !important;
-}
-
-.bg-invoice-indigo-light {
-  background-color: #eef2ff !important;
-}
-
-.bg-invoice-subtle {
-  background-color: #f8fafc !important;
-}
-
-.border-invoice-light {
-  border-color: #f1f5f9 !important;
-}
-
-.divide-invoice-light > * + * {
-  border-top-color: #f1f5f9 !important;
 }
 
 /* Transitions */

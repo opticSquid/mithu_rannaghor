@@ -133,22 +133,22 @@ const Billing = () => {
                         </button>
                     </div>
 
-                    <div id="bill-content" class="bg-invoice-white text-invoice-dark p-12 rounded-lg shadow-2xl max-w-4xl mx-auto border border-invoice-light">
+                    <div id="bill-content" class="bg-white text-slate-800 p-12 rounded-lg shadow-2xl max-w-4xl mx-auto border border-slate-100">
                         {/* Bill Header */}
-                        <div class="flex justify-between items-start border-b-2 border-invoice-light pb-8 mb-8">
+                        <div class="flex justify-between items-start border-b-2 border-slate-100 pb-8 mb-8">
                             <div>
                                 <div class="flex items-center gap-3 mb-4">
-                                    <div class="w-12 h-12 bg-invoice-indigo rounded-lg flex items-center justify-center">
+                                    <div class="w-12 h-12 bg-indigo-600 rounded-lg flex items-center justify-center">
                                         <span class="text-white font-black text-2xl">M</span>
                                     </div>
-                                    <h1 class="text-2xl font-black text-invoice-indigo-dark tracking-tight">MITHU'S RANNAGHOR</h1>
+                                    <h1 class="text-2xl font-black text-indigo-900 tracking-tight">MITHU'S RANNAGHOR</h1>
                                 </div>
-                                <p class="text-invoice-gray text-sm max-w-xs">Home cooked fresh meals delivered to your doorstep. Healthy, hygienic, and tasty.</p>
+                                <p class="text-slate-500 text-sm max-w-xs">Home cooked fresh meals delivered to your doorstep. Healthy, hygienic, and tasty.</p>
                             </div>
                             <div class="text-right">
-                                <h2 class="text-3xl font-bold text-invoice-dark uppercase tracking-tighter">Invoice</h2>
-                                <p class="text-invoice-light mt-1 font-medium">#{report()?.user.user_id}-{new Date().getTime().toString().slice(-6)}</p>
-                                <div class="mt-4 text-sm font-semibold text-invoice-indigo bg-invoice-indigo-light px-3 py-1 rounded-full inline-block">
+                                <h2 class="text-3xl font-bold text-slate-800 uppercase tracking-tighter">Invoice</h2>
+                                <p class="text-slate-400 mt-1 font-medium">#{report()?.user.user_id}-{new Date().getTime().toString().slice(-6)}</p>
+                                <div class="mt-4 text-sm font-semibold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full inline-block">
                                     {new Date(startDate()).toLocaleDateString()} - {new Date(endDate()).toLocaleDateString()}
                                 </div>
                             </div>
@@ -157,17 +157,17 @@ const Billing = () => {
                         {/* Bill Info */}
                         <div class="grid grid-cols-2 gap-12 mb-12">
                             <div>
-                                <h4 class="text-xs font-bold text-invoice-light uppercase tracking-widest mb-3">Bill To:</h4>
-                                <p class="text-xl font-bold text-invoice-dark">{report()?.user.name}</p>
-                                <p class="text-invoice-gray">{report()?.user.mobile_no}</p>
-                                <p class="text-invoice-gray mt-1">{report()?.user.building_no}, {report()?.user.room_no}</p>
+                                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Bill To:</h4>
+                                <p class="text-xl font-bold text-slate-800">{report()?.user.name}</p>
+                                <p class="text-slate-500">{report()?.user.mobile_no}</p>
+                                <p class="text-slate-500 mt-1">{report()?.user.building_no}, {report()?.user.room_no}</p>
                             </div>
                             <div class="text-right">
-                                <h4 class="text-xs font-bold text-invoice-light uppercase tracking-widest mb-3">Summary:</h4>
+                                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Summary:</h4>
                                 <div class="space-y-1">
-                                    <p class="text-invoice-gray">Opening Balance: <span class="text-invoice-dark font-bold">₹{report()?.opening_balance.toFixed(2)}</span></p>
-                                    <p class="text-invoice-gray">Total Billable: <span class="text-invoice-dark font-bold">₹{report()?.total_spent.toFixed(2)}</span></p>
-                                    <p class="text-invoice-gray">Recharges: <span class="text-invoice-dark font-bold">₹{(report()!.closing_balance - (report()!.opening_balance - report()!.total_spent)).toFixed(2)}</span></p>
+                                    <p class="text-slate-500">Opening Balance: <span class="text-slate-800 font-bold">₹{report()?.opening_balance.toFixed(2)}</span></p>
+                                    <p class="text-slate-500">Total Billable: <span class="text-slate-800 font-bold">₹{report()?.total_spent.toFixed(2)}</span></p>
+                                    <p class="text-slate-500">Recharges: <span class="text-slate-800 font-bold">₹{(report()!.closing_balance - (report()!.opening_balance - report()!.total_spent)).toFixed(2)}</span></p>
                                 </div>
                             </div>
                         </div>
@@ -175,31 +175,31 @@ const Billing = () => {
                         {/* Bill Table */}
                         <table class="w-full mb-12">
                             <thead>
-                                <tr class="bg-invoice-subtle text-invoice-gray text-left">
+                                <tr class="bg-slate-50 text-slate-500 text-left">
                                     <th class="py-3 px-4 font-bold text-xs uppercase tracking-wider">Date</th>
                                     <th class="py-3 px-4 font-bold text-xs uppercase tracking-wider">Meal</th>
                                     <th class="py-3 px-4 font-bold text-xs uppercase tracking-wider">Details</th>
                                     <th class="py-3 px-4 font-bold text-xs uppercase tracking-wider text-right">Amount</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-invoice-light">
+                            <tbody class="divide-y divide-slate-100">
                                 <For each={report()?.logs}>
                                     {(log) => (
-                                        <tr class="text-invoice-dark">
+                                        <tr class="text-slate-800">
                                             <td class="py-4 px-4 text-sm">{new Date(log.log_date).toLocaleDateString()}</td>
                                             <td class="py-4 px-4 text-sm font-semibold capitalize">{log.meal_type}</td>
                                             <td class="py-4 px-4 text-sm">
                                                 {log.has_main_meal ? (
                                                     log.is_special ? (
-                                                        <span class="font-bold text-invoice-indigo">{log.special_dish_name} (S) </span>
+                                                        <span class="font-bold text-indigo-600">{log.special_dish_name} (S) </span>
                                                     ) : (
                                                         'Standard '
                                                     )
                                                 ) : (
-                                                    <span class="text-invoice-gray italic font-medium">A La Carte </span>
+                                                    <span class="text-slate-500 italic font-medium">A La Carte </span>
                                                 )}
-                                                {log.extra_rice_qty > 0 && <span class="text-invoice-light">+ Rice ({log.extra_rice_qty}) </span>}
-                                                {log.extra_roti_qty > 0 && <span class="text-invoice-light">+ Roti ({log.extra_roti_qty}) </span>}
+                                                {log.extra_rice_qty > 0 && <span class="text-slate-400">+ Rice ({log.extra_rice_qty}) </span>}
+                                                {log.extra_roti_qty > 0 && <span class="text-slate-400">+ Roti ({log.extra_roti_qty}) </span>}
                                             </td>
                                             <td class="py-4 px-4 text-sm font-bold text-right">₹{log.total_cost.toFixed(2)}</td>
                                         </tr>
@@ -209,26 +209,26 @@ const Billing = () => {
                         </table>
 
                         {/* Bill Totals */}
-                        <div class="flex justify-end pt-8 border-t-2 border-invoice-light">
+                        <div class="flex justify-end pt-8 border-t-2 border-slate-100">
                             <div class="w-64 space-y-4">
-                                <div class="flex justify-between text-invoice-gray font-medium">
+                                <div class="flex justify-between text-slate-500 font-medium">
                                     <span>Subtotal</span>
                                     <span>₹{report()?.total_spent.toFixed(2)}</span>
                                 </div>
-                                <div class="flex justify-between text-2xl font-black text-invoice-indigo-dark border-t border-invoice-light pt-4">
+                                <div class="flex justify-between text-2xl font-black text-indigo-900 border-t border-slate-100 pt-4">
                                     <span>Total</span>
                                     <span>₹{report()?.total_spent.toFixed(2)}</span>
                                 </div>
-                                <div class={`p-4 rounded-xl mt-4 flex justify-between ${report()!.closing_balance < 0 ? 'bg-invoice-red-light text-invoice-red' : 'bg-invoice-emerald-light text-invoice-emerald'}`}>
+                                <div class={`p-4 rounded-xl mt-4 flex justify-between ${report()!.closing_balance < 0 ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700'}`}>
                                     <span class="text-xs font-bold uppercase">Balance Status</span>
                                     <span class="font-bold">₹{report()?.closing_balance.toFixed(2)}</span>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="mt-20 text-center border-t border-invoice-light pt-8 opacity-40 grayscale">
-                            <p class="text-xs font-bold uppercase tracking-[0.2em] mb-2 text-invoice-light">Generated via Mithu's Rannaghor Admin Panel</p>
-                            <p class="text-[10px] text-invoice-light">Thank you for Choosing Home Cooked Goodness.</p>
+                        <div class="mt-20 text-center border-t border-slate-100 pt-8 opacity-40 grayscale">
+                            <p class="text-xs font-bold uppercase tracking-[0.2em] mb-2 text-slate-400">Generated via Mithu's Rannaghor Admin Panel</p>
+                            <p class="text-[10px] text-slate-400">Thank you for Choosing Home Cooked Goodness.</p>
                         </div>
                     </div>
                 </div>
