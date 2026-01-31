@@ -1,12 +1,11 @@
-import { createSignal, onMount, type ParentComponent } from 'solid-js';
 import { A, useLocation } from '@solidjs/router';
 import {
-    Users,
-    PlusCircle,
     FileText,
     LayoutDashboard,
-    History
+    PlusCircle,
+    Users
 } from 'lucide-solid';
+import { type ParentComponent } from 'solid-js';
 
 const App: ParentComponent = (props) => {
     const location = useLocation();
@@ -19,7 +18,7 @@ const App: ParentComponent = (props) => {
                     <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
                         Admin Panel
                     </h1>
-                    <p class="text-xs text-text-dim mt-1">Mithu's Rannaghor</p>
+                    <p class="text-xs text-text-dim mt-1">Rajitar Rannaghor</p>
                 </div>
 
                 <nav class="flex-1 px-4 space-y-2">
@@ -36,7 +35,7 @@ const App: ParentComponent = (props) => {
                         </div>
                         <div>
                             <p class="text-sm font-semibold">Admin</p>
-                            <p class="text-xs text-text-dim">Mithu Rannaghor</p>
+                            <p class="text-xs text-text-dim">Ranjitar Rannaghor</p>
                         </div>
                     </div>
                 </div>
@@ -54,8 +53,8 @@ const NavItem = (props: { href: string; icon: any; label: string; active: boolea
     <A
         href={props.href}
         class={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${props.active
-                ? 'bg-primary text-white shadow-lg shadow-primary-glow'
-                : 'hover:bg-white/10 text-text-dim hover:text-white'
+            ? 'bg-primary text-white shadow-lg shadow-primary-glow'
+            : 'hover:bg-white/10 text-text-dim hover:text-white'
             }`}
     >
         <props.icon size={20} />

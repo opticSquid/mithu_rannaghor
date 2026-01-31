@@ -14,7 +14,7 @@ var dbPool *pgxpool.Pool
 func initDB() {
 	password := os.Getenv("POSTGRES_PASSWORD")
 	if password == "" {
-		password = "PkNLm@&$2357" // fallback for local dev if not set
+		password = "Password" // fallback for local dev if not set
 	}
 	connStr := fmt.Sprintf("postgres://postgres:%s@localhost:5432/postgres?sslmode=disable", password)
 

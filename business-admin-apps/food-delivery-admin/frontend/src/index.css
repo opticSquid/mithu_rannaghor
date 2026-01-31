@@ -51,7 +51,7 @@
   --text: var(--md-sys-color-on-surface);
   --text-dim: var(--md-sys-color-on-surface-variant);
 
-  --font-family: 'Outfit', sans-serif;
+  --font-family: "Outfit", sans-serif;
 
   /* Shapes */
   --shape-corner-extra-large: 28px;
@@ -62,8 +62,8 @@
 
 * {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+  margin: 0px;
+  padding: 2px;
 }
 
 body {
@@ -208,7 +208,7 @@ body {
   border-color: #f1f5f9 !important;
 }
 
-.divide-invoice-light>*+* {
+.divide-invoice-light > * + * {
   border-top-color: #f1f5f9 !important;
 }
 
