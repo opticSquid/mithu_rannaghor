@@ -1,10 +1,12 @@
-import { createSignal, onMount, For } from 'solid-js';
+import { createSignal, onMount, For, createEffect } from 'solid-js';
 import axios from 'axios';
-import { User } from '../types';
-import { Check, Utensils, Moon, Sun, ChefHat, Salad } from 'lucide-solid';
+import { User, DailyLog } from '../types';
+import { Check, Utensils, Moon, Sun, ChefHat, Salad, Trash2, Edit2, X } from 'lucide-solid';
+
 
 const DailyEntry = () => {
     const [users, setUsers] = createSignal<User[]>([]);
+    const [logs, setLogs] = createSignal<DailyLog[]>([]);
     const [selectedUser, setSelectedUser] = createSignal<string>('');
     const [date, setDate] = createSignal(new Date().toISOString().split('T')[0]);
     const [mealType, setMealType] = createSignal<'lunch' | 'dinner'>('lunch');
@@ -14,6 +16,7 @@ const DailyEntry = () => {
     const [extraRoti, setExtraRoti] = createSignal(0);
     const [isSubmitting, setIsSubmitting] = createSignal(false);
     const [successMsg, setSuccessMsg] = createSignal(false);
+    const [editingLog, setEditingLog] = createSignal<DailyLog | null>(null);
 
     const fetchUsers = async () => {
         try {
@@ -25,6 +28,39 @@ const DailyEntry = () => {
     };
 
     onMount(fetchUsers);
+
+    const fetchLogs = async () => {
+        try {
+            const userId = selectedUser();
+            const res = await axios.get(`/api/daily-entry?date=${date()}${userId ? `&user_id=${userId}` : ''}`);
+            setLogs(res.data || []);
+        } catch (error) {
+            console.error('Failed to fetch logs:', error);
+        }
+    };
+
+    // Construct a derived signal or effect to fetch logs when date or selectedUser changes
+    createEffect(() => {
+        // Track date and selectedUser
+        date();
+        selectedUser();
+        fetchLogs();
+    });
+
+    const handleDelete = async (logId: number) => {
+        if (!confirm('Are you sure you want to delete this entry? This will refund the cost to the user\'s wallet.')) return;
+
+        try {
+            await axios.delete(`/api/daily-entry/${logId}`);
+            setSuccessMsg(true); // Reuse success msg or create a new one
+            setTimeout(() => setSuccessMsg(false), 3000);
+            await fetchLogs();
+            await fetchUsers(); // Update wallet balance
+        } catch (error) {
+            console.error('Failed to delete log:', error);
+            alert('Failed to delete entry');
+        }
+    };
 
     const handleSubmit = async (e: Event) => {
         e.preventDefault();
@@ -45,6 +81,7 @@ const DailyEntry = () => {
             setSuccessMsg(true);
             setTimeout(() => setSuccessMsg(false), 3000);
             await fetchUsers();
+            await fetchLogs();
 
             // Reset some fields
             setMealCategory('standard');
@@ -218,9 +255,187 @@ const DailyEntry = () => {
                 </div>
             </form>
 
+            {/* Recent Entries Table */}
+            <div class="md-card mt-4 p-6 slide-in-from-bottom animate-in duration-700 delay-100">
+                <h3 class="text-xl font-bold text-[var(--md-sys-color-primary)] mb-4 flex items-center gap-2">
+                    <span class="bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] px-2 py-1 rounded-lg text-sm">
+                        {date()}
+                    </span>
+                    Entries
+                </h3>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-[var(--md-sys-color-surface-container-highest)] text-[var(--md-sys-color-on-surface-variant)]">
+                            <tr>
+                                <th class="p-3 rounded-l-xl">Customer</th>
+                                <th class="p-3">Meal</th>
+                                <th class="p-3">Details</th>
+                                <th class="p-3 text-right">Cost</th>
+                                <th class="p-3 rounded-r-xl text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-[var(--md-sys-color-outline-variant)]">
+                            <For each={logs()}>
+                                {(log) => (
+                                    <tr class="hover:bg-[var(--md-sys-color-surface-container-high)] transition-colors">
+                                        <td class="p-3 font-medium">{log.user_name || users().find(u => u.user_id === log.user_id)?.name || log.user_id}</td>
+                                        <td class="p-3 capitalize">
+                                            <span class={`px-2 py-1 rounded-md text-xs font-bold ${log.meal_type === 'lunch' ? 'bg-amber-100 text-amber-800' : 'bg-indigo-100 text-indigo-800'}`}>
+                                                {log.meal_type}
+                                            </span>
+                                        </td>
+                                        <td class="p-3 text-[var(--md-sys-color-on-surface-variant)]">
+                                            {log.has_main_meal ? (log.is_special ? log.special_dish_name : 'Standard') : 'Extras Only'}
+                                            {(log.extra_rice_qty > 0 || log.extra_roti_qty > 0) && (
+                                                <span class="text-xs ml-2 opacity-70">
+                                                    (Rice: {log.extra_rice_qty}, Roti: {log.extra_roti_qty})
+                                                </span>
+                                            )}
+                                        </td>
+                                        <td class="p-3 text-right font-bold">₹{log.total_cost}</td>
+                                        <td class="p-3 flex justify-center gap-2">
+                                            <button
+                                                class="w-8 h-8 rounded-full hover:bg-[var(--md-sys-color-secondary-container)] hover:text-[var(--md-sys-color-on-secondary-container)] flex items-center justify-center transition-colors text-[var(--md-sys-color-on-surface-variant)]"
+                                                title="Edit"
+                                                onClick={() => setEditingLog(log)}
+                                            >
+                                                <Edit2 size={16} />
+                                            </button>
+                                            <button
+                                                class="w-8 h-8 rounded-full hover:bg-[var(--md-sys-color-error-container)] hover:text-[var(--md-sys-color-on-error-container)] flex items-center justify-center transition-colors text-[var(--md-sys-color-error)]"
+                                                title="Delete"
+                                                onClick={() => handleDelete(log.log_id)}
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                )}
+                            </For>
+                            {logs().length === 0 && (
+                                <tr>
+                                    <td colspan={5} class="p-8 text-center text-[var(--md-sys-color-outline)]">
+                                        No entries found for this date.
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             <div class={`fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-[var(--md-sys-color-tertiary-container)] text-[var(--md-sys-color-on-tertiary-container)] border border-[var(--md-sys-color-tertiary)] px-6 py-4 rounded-full shadow-2xl flex items-center gap-3 transition-all duration-300 ${successMsg() ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}>
                 <div class="bg-[var(--md-sys-color-on-tertiary-container)] rounded-full p-1"><Check size={16} class="text-[var(--md-sys-color-tertiary-container)]" /></div>
                 <span class="font-bold tracking-wide">Meal recorded successfully</span>
+            </div>
+
+            {/* Edit Modal */}
+            {editingLog() && (
+                <EditLogModal
+                    log={editingLog()!}
+                    onClose={() => setEditingLog(null)}
+                    onSuccess={async () => {
+                        setEditingLog(null);
+                        await fetchLogs();
+                        await fetchUsers();
+                        setSuccessMsg(true);
+                        setTimeout(() => setSuccessMsg(false), 3000);
+                    }}
+                />
+            )}
+        </div>
+    );
+};
+
+const EditLogModal = (props: { log: DailyLog; onClose: () => void; onSuccess: () => void }) => {
+    const [mealType, setMealType] = createSignal(props.log.meal_type);
+    const [extraRice, setExtraRice] = createSignal(props.log.extra_rice_qty);
+    const [extraRoti, setExtraRoti] = createSignal(props.log.extra_roti_qty);
+    const [isSubmitting, setIsSubmitting] = createSignal(false);
+
+    // Derived category from props for initial state if possible, or just default to simple edits
+    // For simplicity, let's allow editing Shift (Meal Type) and Extras. 
+    // Changing standard/special is complex UI, let's stick to extras/shift for now as those are most common corrections. 
+    // If they need to change meal Categoy, they might prefer deleting and re-adding, but let's try to support Extras edit.
+
+    const handleSubmit = async (e: Event) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        try {
+            await axios.put(`/api/daily-entry/${props.log.log_id}`, {
+                meal_type: mealType(),
+                extra_rice_qty: extraRice(),
+                extra_roti_qty: extraRoti()
+                // Pass other fields as is or undefined if backend handles partial updates
+            });
+            props.onSuccess();
+        } catch (err) {
+            alert('Failed to update entry');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    return (
+        <div class="fixed inset-0 z-[60] grid place-items-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+            <div class="glass w-full max-w-md p-6 shadow-2xl animate-in zoom-in duration-300 bg-[var(--md-sys-color-surface)] relative rounded-3xl">
+                <button onClick={props.onClose} class="absolute top-4 right-4 text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)]">
+                    <X size={24} />
+                </button>
+                <h3 class="text-2xl font-bold text-[var(--md-sys-color-on-surface)] mb-6">Edit Entry</h3>
+
+                <form onSubmit={handleSubmit} class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-bold text-[var(--md-sys-color-primary)] mb-2 uppercase tracking-wider">Shift</label>
+                        <div class="flex gap-2">
+                            <button
+                                type="button"
+                                onClick={() => setMealType('lunch')}
+                                class={`flex-1 py-3 rounded-full text-sm font-bold flex items-center justify-center gap-2 transition-all ${mealType() === 'lunch' ? 'bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] shadow-md' : 'bg-[var(--md-sys-color-surface-container-highest)] text-[var(--md-sys-color-on-surface-variant)]'}`}
+                            >
+                                <Sun size={16} /> Lunch
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setMealType('dinner')}
+                                class={`flex-1 py-3 rounded-full text-sm font-bold flex items-center justify-center gap-2 transition-all ${mealType() === 'dinner' ? 'bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] shadow-md' : 'bg-[var(--md-sys-color-surface-container-highest)] text-[var(--md-sys-color-on-surface-variant)]'}`}
+                            >
+                                <Moon size={16} /> Dinner
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-[var(--md-sys-color-primary)] mb-2 uppercase tracking-wider">Extras</label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-[var(--md-sys-color-surface-container-high)] p-3 rounded-xl flex flex-col items-center">
+                                <span class="text-xs font-medium text-[var(--md-sys-color-on-surface-variant)] mb-2">Rice</span>
+                                <div class="flex items-center gap-3">
+                                    <button type="button" onClick={() => setExtraRice(Math.max(0, extraRice() - 1))} class="w-8 h-8 rounded-full bg-[var(--md-sys-color-surface-container-highest)] font-bold">-</button>
+                                    <span class="font-bold w-4 text-center">{extraRice()}</span>
+                                    <button type="button" onClick={() => setExtraRice(extraRice() + 1)} class="w-8 h-8 rounded-full bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] font-bold">+</button>
+                                </div>
+                            </div>
+                            <div class="bg-[var(--md-sys-color-surface-container-high)] p-3 rounded-xl flex flex-col items-center">
+                                <span class="text-xs font-medium text-[var(--md-sys-color-on-surface-variant)] mb-2">Roti</span>
+                                <div class="flex items-center gap-3">
+                                    <button type="button" onClick={() => setExtraRoti(Math.max(0, extraRoti() - 1))} class="w-8 h-8 rounded-full bg-[var(--md-sys-color-surface-container-highest)] font-bold">-</button>
+                                    <span class="font-bold w-4 text-center">{extraRoti()}</span>
+                                    <button type="button" onClick={() => setExtraRoti(extraRoti() + 1)} class="w-8 h-8 rounded-full bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] font-bold">+</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button
+                        type="submit"
+                        disabled={isSubmitting()}
+                        class="btn-primary w-full h-12 rounded-xl font-bold text-lg"
+                    >
+                        {isSubmitting() ? 'Saving...' : 'Save Changes'}
+                    </button>
+                </form>
             </div>
         </div>
     );

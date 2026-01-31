@@ -11,7 +11,7 @@ const App: ParentComponent = (props) => {
     const location = useLocation();
 
     return (
-        <div class="flex min-h-screen bg-transparent">
+        <div class="flex h-screen bg-transparent">
             {/* Sidebar */}
             <aside class="w-64 glass m-4 border-none shadow-2xl flex flex-col">
                 <div class="p-8">

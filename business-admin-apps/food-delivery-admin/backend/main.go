@@ -27,7 +27,10 @@ func main() {
 		r.Get("/users", getUsers)
 		r.Post("/users", createUser)
 		r.Post("/wallet/recharge", rechargeWallet)
+		r.Get("/daily-entry", getDailyEntries)
 		r.Post("/daily-entry", createDailyEntry)
+		r.Put("/daily-entry/{id}", updateDailyEntry)
+		r.Delete("/daily-entry/{id}", deleteDailyEntry)
 		r.Get("/reports/bill", getBill)
 	})
 
