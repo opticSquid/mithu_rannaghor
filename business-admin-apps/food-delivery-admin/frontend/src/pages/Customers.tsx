@@ -233,7 +233,8 @@ const RechargeForm = (props: { user: User; onSuccess: () => void }) => {
             <div>
                 <label class="block text-sm font-medium text-text-dim mb-1">Amount (₹)</label>
                 <input
-                    type="number"
+                    type="text"
+                    inputMode='decimal'
                     class="input text-2xl font-bold"
                     required
                     onInput={e => setAmount(e.currentTarget.value)}

@@ -14,17 +14,17 @@ RUN bun run build
 # Build stage for backend
 FROM golang:1.25-alpine AS backend-builder
 
-WORKDIR /app/backend
+WORKDIR /app
 
 # Install build dependencies
 RUN apk add --no-cache git
 
 # Copy go mod files and download dependencies
-COPY backend/go.mod backend/go.sum ./
+COPY go.mod go.sum ./
 RUN go mod download
 
 # Copy backend source
-COPY backend/*.go ./
+COPY *.go ./
 
 # Build static binary
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o food-delivery-admin .
@@ -38,7 +38,7 @@ WORKDIR /app
 RUN apk --no-cache add ca-certificates
 
 # Copy compiled backend binary
-COPY --from=backend-builder /app/backend/food-delivery-admin .
+COPY --from=backend-builder /app/food-delivery-admin .
 
 # Copy frontend dist files
 COPY --from=frontend-builder /app/dist ./dist

@@ -1,9 +1,7 @@
 # Node modules
-node_modules/
 frontend/node_modules/
 
 # Build outputs
-frontend/dist/
 dist/
 
 # Git
@@ -43,4 +41,4 @@ coverage/
 .nyc_output/
 
 # Compiled binary (we build fresh in Docker)
-backend/food-delivery-admin
+food-delivery-admin
