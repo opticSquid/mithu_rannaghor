@@ -377,7 +377,7 @@ func getDailyEntries(w http.ResponseWriter, r *http.Request) {
 	var logs []DailyLog
 	for rows.Next() {
 		var l DailyLog
-		err := rows.Scan(&l.LogID, &l.UserID, &l.UserName, &l.LogDate, &l.MealType, &l.HasMainMeal, &l.IsSpecial, &l.SpecialDishName, &l.ExtraRiceQty, &l.ExtraRotiQty, &l.TotalCost)
+		err := rows.Scan(&l.LogID, &l.UserID, &l.UserName, &l.LogDate, &l.MealType, &l.HasMainMeal, &l.IsSpecial, &l.SpecialDishName, &l.ExtraRiceQty, &l.ExtraRotiQty, &l.ExtraChickenQty, &l.ExtraFishQty, &l.ExtraEggQty, &l.ExtraVegetableQty, &l.TotalCost)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
