@@ -1,7 +1,7 @@
-import { createSignal, onMount, For, createEffect } from 'solid-js';
 import axios from 'axios';
-import { User, DailyLog } from '../types';
-import { Check, Utensils, Moon, Sun, ChefHat, Salad, Trash2, Edit2, X } from 'lucide-solid';
+import { Check, ChefHat, Moon, Salad, SquarePen, Sun, Trash2, Utensils, X } from 'lucide-solid';
+import { For, createEffect, createSignal, onMount } from 'solid-js';
+import { DailyLog, User } from '../types';
 
 
 const DailyEntry = () => {
@@ -14,6 +14,10 @@ const DailyEntry = () => {
     const [specialDish, setSpecialDish] = createSignal('');
     const [extraRice, setExtraRice] = createSignal(0);
     const [extraRoti, setExtraRoti] = createSignal(0);
+    const [extraChicken, setExtraChicken] = createSignal(0);
+    const [extraFish, setExtraFish] = createSignal(0);
+    const [extraEgg, setExtraEgg] = createSignal(0);
+    const [extraVegetable, setExtraVegetable] = createSignal(0);
     const [isSubmitting, setIsSubmitting] = createSignal(false);
     const [successMsg, setSuccessMsg] = createSignal(false);
     const [editingLog, setEditingLog] = createSignal<DailyLog | null>(null);
@@ -76,7 +80,11 @@ const DailyEntry = () => {
                 is_special: mealCategory() === 'special',
                 special_dish_name: mealCategory() === 'special' ? specialDish() : '',
                 extra_rice_qty: extraRice(),
-                extra_roti_qty: extraRoti()
+                extra_roti_qty: extraRoti(),
+                extra_chicken_qty: extraChicken(),
+                extra_fish_qty: extraFish(),
+                extra_egg_qty: extraEgg(),
+                extra_vegetable_qty: extraVegetable()
             });
             setSuccessMsg(true);
             setTimeout(() => setSuccessMsg(false), 3000);
@@ -88,6 +96,10 @@ const DailyEntry = () => {
             setSpecialDish('');
             setExtraRice(0);
             setExtraRoti(0);
+            setExtraChicken(0);
+            setExtraFish(0);
+            setExtraEgg(0);
+            setExtraVegetable(0);
         } catch (err) {
             alert('Failed to record entry');
         } finally {
@@ -238,6 +250,42 @@ const DailyEntry = () => {
                                 <button type="button" onClick={() => setExtraRoti(extraRoti() + 1)} class="w-10 h-10 rounded-full bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] hover:opacity-90 transition-colors flex items-center justify-center font-bold text-xl">+</button>
                             </div>
                         </div>
+                        {/* Chicken */}
+                        <div class="bg-[var(--md-sys-color-surface-container-high)] p-4 rounded-2xl flex flex-col items-center">
+                            <span class="text-xs font-medium text-[var(--md-sys-color-on-surface-variant)] mb-2">Extra Chicken (₹30)</span>
+                            <div class="flex items-center gap-4">
+                                <button type="button" onClick={() => setExtraChicken(Math.max(0, extraChicken() - 1))} class="w-10 h-10 rounded-full bg-[var(--md-sys-color-surface-container-highest)] hover:bg-[var(--md-sys-color-primary-container)] hover:text-[var(--md-sys-color-on-primary-container)] transition-colors flex items-center justify-center font-bold text-xl">-</button>
+                                <span class="text-xl font-bold w-6 text-center">{extraChicken()}</span>
+                                <button type="button" onClick={() => setExtraChicken(extraChicken() + 1)} class="w-10 h-10 rounded-full bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] hover:opacity-90 transition-colors flex items-center justify-center font-bold text-xl">+</button>
+                            </div>
+                        </div>
+                        {/* Fish */}
+                        <div class="bg-[var(--md-sys-color-surface-container-high)] p-4 rounded-2xl flex flex-col items-center">
+                            <span class="text-xs font-medium text-[var(--md-sys-color-on-surface-variant)] mb-2">Extra Fish (₹20)</span>
+                            <div class="flex items-center gap-4">
+                                <button type="button" onClick={() => setExtraFish(Math.max(0, extraFish() - 1))} class="w-10 h-10 rounded-full bg-[var(--md-sys-color-surface-container-highest)] hover:bg-[var(--md-sys-color-primary-container)] hover:text-[var(--md-sys-color-on-primary-container)] transition-colors flex items-center justify-center font-bold text-xl">-</button>
+                                <span class="text-xl font-bold w-6 text-center">{extraFish()}</span>
+                                <button type="button" onClick={() => setExtraFish(extraFish() + 1)} class="w-10 h-10 rounded-full bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] hover:opacity-90 transition-colors flex items-center justify-center font-bold text-xl">+</button>
+                            </div>
+                        </div>
+                        {/* Egg */}
+                        <div class="bg-[var(--md-sys-color-surface-container-high)] p-4 rounded-2xl flex flex-col items-center">
+                            <span class="text-xs font-medium text-[var(--md-sys-color-on-surface-variant)] mb-2">Extra Egg (₹10)</span>
+                            <div class="flex items-center gap-4">
+                                <button type="button" onClick={() => setExtraEgg(Math.max(0, extraEgg() - 1))} class="w-10 h-10 rounded-full bg-[var(--md-sys-color-surface-container-highest)] hover:bg-[var(--md-sys-color-primary-container)] hover:text-[var(--md-sys-color-on-primary-container)] transition-colors flex items-center justify-center font-bold text-xl">-</button>
+                                <span class="text-xl font-bold w-6 text-center">{extraEgg()}</span>
+                                <button type="button" onClick={() => setExtraEgg(extraEgg() + 1)} class="w-10 h-10 rounded-full bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] hover:opacity-90 transition-colors flex items-center justify-center font-bold text-xl">+</button>
+                            </div>
+                        </div>
+                        {/* Vegetable */}
+                        <div class="bg-[var(--md-sys-color-surface-container-high)] p-4 rounded-2xl flex flex-col items-center">
+                            <span class="text-xs font-medium text-[var(--md-sys-color-on-surface-variant)] mb-2">Extra Vegetable (₹15)</span>
+                            <div class="flex items-center gap-4">
+                                <button type="button" onClick={() => setExtraVegetable(Math.max(0, extraVegetable() - 1))} class="w-10 h-10 rounded-full bg-[var(--md-sys-color-surface-container-highest)] hover:bg-[var(--md-sys-color-primary-container)] hover:text-[var(--md-sys-color-on-primary-container)] transition-colors flex items-center justify-center font-bold text-xl">-</button>
+                                <span class="text-xl font-bold w-6 text-center">{extraVegetable()}</span>
+                                <button type="button" onClick={() => setExtraVegetable(extraVegetable() + 1)} class="w-10 h-10 rounded-full bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] hover:opacity-90 transition-colors flex items-center justify-center font-bold text-xl">+</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -287,9 +335,9 @@ const DailyEntry = () => {
                                         </td>
                                         <td class="p-3 text-[var(--md-sys-color-on-surface-variant)]">
                                             {log.has_main_meal ? (log.is_special ? log.special_dish_name : 'Standard') : 'Extras Only'}
-                                            {(log.extra_rice_qty > 0 || log.extra_roti_qty > 0) && (
+                                            {(log.extra_rice_qty > 0 || log.extra_roti_qty > 0 || log.extra_chicken_qty > 0 || log.extra_fish_qty > 0 || log.extra_egg_qty > 0 || log.extra_vegetable_qty > 0) && (
                                                 <span class="text-xs ml-2 opacity-70">
-                                                    (Rice: {log.extra_rice_qty}, Roti: {log.extra_roti_qty})
+                                                    (Rice: {log.extra_rice_qty}, Roti: {log.extra_roti_qty}, Chicken: {log.extra_chicken_qty}, Fish: {log.extra_fish_qty}, Egg: {log.extra_egg_qty}, Vegetable: {log.extra_vegetable_qty})
                                                 </span>
                                             )}
                                         </td>
@@ -300,7 +348,7 @@ const DailyEntry = () => {
                                                 title="Edit"
                                                 onClick={() => setEditingLog(log)}
                                             >
-                                                <Edit2 size={16} />
+                                                <SquarePen size={16} />
                                             </button>
                                             <button
                                                 class="w-8 h-8 rounded-full hover:bg-[var(--md-sys-color-error-container)] hover:text-[var(--md-sys-color-on-error-container)] flex items-center justify-center transition-colors text-[var(--md-sys-color-error)]"

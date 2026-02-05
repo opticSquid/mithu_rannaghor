@@ -20,6 +20,10 @@ export interface DailyLog {
     special_dish_name: string;
     extra_rice_qty: number;
     extra_roti_qty: number;
+    extra_chicken_qty: number;
+    extra_fish_qty: number;
+    extra_egg_qty: number;
+    extra_vegetable_qty: number;
     total_cost: number;
 }
 

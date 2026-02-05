@@ -11,10 +11,14 @@ import (
 )
 
 const (
-	StandardMealPrice = 52.5
-	SpecialMealPrice  = 120.0
-	RicePricePerPlate = 10.0
-	RotiPricePerPiece = 4.0
+	StandardMealPrice      = 52.5
+	SpecialMealPrice       = 120.0
+	RicePricePerPlate      = 10.0
+	RotiPricePerPiece      = 4.0
+	ChickenPricePerPiece   = 30.0
+	FishPricePerPiece      = 20.0
+	EggPricePerPiece       = 10.0
+	VegetablePricePerPiece = 15.0
 )
 
 func getUsers(w http.ResponseWriter, r *http.Request) {
@@ -139,7 +143,7 @@ func createDailyEntry(w http.ResponseWriter, r *http.Request) {
 			mealPrice = SpecialMealPrice
 		}
 	}
-	totalCost := mealPrice + (float64(log.ExtraRiceQty) * RicePricePerPlate) + (float64(log.ExtraRotiQty) * RotiPricePerPiece)
+	totalCost := mealPrice + (float64(log.ExtraRiceQty) * RicePricePerPlate) + (float64(log.ExtraRotiQty) * RotiPricePerPiece) + (float64(log.ExtraChickenQty) * ChickenPricePerPiece) + (float64(log.ExtraFishQty) * FishPricePerPiece) + (float64(log.ExtraEggQty) * EggPricePerPiece) + (float64(log.ExtraVegetableQty) * VegetablePricePerPiece)
 
 	tx, err := dbPool.Begin(context.Background())
 	if err != nil {
@@ -150,9 +154,9 @@ func createDailyEntry(w http.ResponseWriter, r *http.Request) {
 
 	// Insert Log
 	_, err = tx.Exec(context.Background(), `
-		INSERT INTO DAILY_LOGS (USER_ID, LOG_DATE, MEAL_TYPE, HAS_MAIN_MEAL, IS_SPECIAL, SPECIAL_DISH_NAME, EXTRA_RICE_QTY, EXTRA_ROTI_QTY, TOTAL_COST) 
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-	`, log.UserID, log.LogDate, log.MealType, log.HasMainMeal, log.IsSpecial, log.SpecialDishName, log.ExtraRiceQty, log.ExtraRotiQty, totalCost)
+		INSERT INTO DAILY_LOGS (USER_ID, LOG_DATE, MEAL_TYPE, HAS_MAIN_MEAL, IS_SPECIAL, SPECIAL_DISH_NAME, EXTRA_RICE_QTY, EXTRA_ROTI_QTY, EXTRA_CHICKEN_QTY, EXTRA_FISH_QTY, EXTRA_EGG_QTY, EXTRA_VEGETABLE_QTY, TOTAL_COST) 
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9	, $10, $11, $12, $13)
+	`, log.UserID, log.LogDate, log.MealType, log.HasMainMeal, log.IsSpecial, log.SpecialDishName, log.ExtraRiceQty, log.ExtraRotiQty, log.ExtraChickenQty, log.ExtraFishQty, log.ExtraEggQty, log.ExtraVegetableQty, totalCost)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -316,14 +320,18 @@ func updateDailyEntry(w http.ResponseWriter, r *http.Request) {
 }
 
 type EntryRequest struct {
-	UserID          int       `json:"user_id"`
-	LogDate         time.Time `json:"log_date"`
-	MealType        string    `json:"meal_type"`
-	HasMainMeal     bool      `json:"has_main_meal"`
-	IsSpecial       bool      `json:"is_special"`
-	SpecialDishName string    `json:"special_dish_name"`
-	ExtraRiceQty    int       `json:"extra_rice_qty"`
-	ExtraRotiQty    int       `json:"extra_roti_qty"`
+	UserID            int       `json:"user_id"`
+	LogDate           time.Time `json:"log_date"`
+	MealType          string    `json:"meal_type"`
+	HasMainMeal       bool      `json:"has_main_meal"`
+	IsSpecial         bool      `json:"is_special"`
+	SpecialDishName   string    `json:"special_dish_name"`
+	ExtraRiceQty      int       `json:"extra_rice_qty"`
+	ExtraRotiQty      int       `json:"extra_roti_qty"`
+	ExtraChickenQty   int       `json:"extra_chicken_qty"`
+	ExtraFishQty      int       `json:"extra_fish_qty"`
+	ExtraEggQty       int       `json:"extra_egg_qty"`
+	ExtraVegetableQty int       `json:"extra_vegetable_qty"`
 }
 
 func getDailyEntries(w http.ResponseWriter, r *http.Request) {
@@ -344,7 +352,7 @@ func getDailyEntries(w http.ResponseWriter, r *http.Request) {
 	query := `
 		SELECT l.LOG_ID, l.USER_ID, u.NAME as USER_NAME, l.LOG_DATE, l.MEAL_TYPE, 
 		       l.HAS_MAIN_MEAL, l.IS_SPECIAL, l.SPECIAL_DISH_NAME, 
-		       l.EXTRA_RICE_QTY, l.EXTRA_ROTI_QTY, l.TOTAL_COST 
+		       l.EXTRA_RICE_QTY, l.EXTRA_ROTI_QTY, l.EXTRA_CHICKEN_QTY, l.EXTRA_FISH_QTY, l.EXTRA_EGG_QTY, l.EXTRA_VEGETABLE_QTY, l.TOTAL_COST 
 		FROM DAILY_LOGS l
 		JOIN USERS u ON l.USER_ID = u.USER_ID
 		WHERE l.LOG_DATE = $1

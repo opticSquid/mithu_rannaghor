@@ -215,6 +215,10 @@ const Billing = () => {
                                                 )}
                                                 {log.extra_rice_qty > 0 && <span class="text-slate-400">+ Rice ({log.extra_rice_qty}) </span>}
                                                 {log.extra_roti_qty > 0 && <span class="text-slate-400">+ Roti ({log.extra_roti_qty}) </span>}
+                                                {log.extra_chicken_qty > 0 && <span class="text-slate-400">+ Chicken ({log.extra_chicken_qty}) </span>}
+                                                {log.extra_fish_qty > 0 && <span class="text-slate-400">+ Fish ({log.extra_fish_qty}) </span>}
+                                                {log.extra_egg_qty > 0 && <span class="text-slate-400">+ Egg ({log.extra_egg_qty}) </span>}
+                                                {log.extra_vegetable_qty > 0 && <span class="text-slate-400">+ Vegetable ({log.extra_vegetable_qty}) </span>}
                                             </td>
                                             <td class="py-4 px-4 text-sm font-bold text-right">₹{log.total_cost.toFixed(2)}</td>
                                         </tr>
