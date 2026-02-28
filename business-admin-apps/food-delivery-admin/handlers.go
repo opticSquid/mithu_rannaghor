@@ -298,10 +298,10 @@ func updateDailyEntry(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Log Transaction
-		txnType := "adjustment_charge"
+		txnType := "delivery"
 		txnAmount := costDiff
 		if costDiff < 0 {
-			txnType = "adjustment_refund"
+			txnType = "refund"
 			txnAmount = -costDiff
 		}
 
