@@ -14,7 +14,7 @@ services:
     volumes:
       - geopostgresVolume:/var/lib/postgresql
   app:
-    image: food-delivery-admin:1.1.2
+    image: food-delivery-admin:1.1.3
     ports:
       - 8080:8080
     depends_on:

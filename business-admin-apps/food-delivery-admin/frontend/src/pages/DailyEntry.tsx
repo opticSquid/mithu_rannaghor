@@ -414,7 +414,9 @@ const EditLogModal = (props: { log: DailyLog; onClose: () => void; onSuccess: ()
             await axios.put(`/api/daily-entry/${props.log.log_id}`, {
                 meal_type: mealType(),
                 extra_rice_qty: extraRice(),
-                extra_roti_qty: extraRoti()
+                extra_roti_qty: extraRoti(),
+                has_main_meal: props.log.has_main_meal,
+                is_special: props.log.is_special
                 // Pass other fields as is or undefined if backend handles partial updates
             });
             props.onSuccess();
