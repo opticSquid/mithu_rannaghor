@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -10,16 +11,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-const (
-	StandardMealPrice      = 52.5
-	SpecialMealPrice       = 120.0
-	RicePricePerPlate      = 10.0
-	RotiPricePerPiece      = 4.0
-	ChickenPricePerPiece   = 30.0
-	FishPricePerPiece      = 20.0
-	EggPricePerPiece       = 10.0
-	VegetablePricePerPiece = 15.0
-)
+// Hardcoded constants removed, read from DB table MEAL_PRICES
 
 func getUsers(w http.ResponseWriter, r *http.Request) {
 	rows, err := dbPool.Query(context.Background(), `
@@ -134,16 +126,18 @@ func createDailyEntry(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	// Get current meal prices
+	prices := getMealPricesInternal()
 
 	// Calculate cost
 	mealPrice := 0.0
 	if log.HasMainMeal {
-		mealPrice = StandardMealPrice
+		mealPrice = prices["standard"]
 		if log.IsSpecial {
-			mealPrice = SpecialMealPrice
+			mealPrice = prices["special"]
 		}
 	}
-	totalCost := mealPrice + (float64(log.ExtraRiceQty) * RicePricePerPlate) + (float64(log.ExtraRotiQty) * RotiPricePerPiece) + (float64(log.ExtraChickenQty) * ChickenPricePerPiece) + (float64(log.ExtraFishQty) * FishPricePerPiece) + (float64(log.ExtraEggQty) * EggPricePerPiece) + (float64(log.ExtraVegetableQty) * VegetablePricePerPiece)
+	totalCost := mealPrice + (float64(log.ExtraRiceQty) * prices["rice"]) + (float64(log.ExtraRotiQty) * prices["roti"]) + (float64(log.ExtraChickenQty) * prices["chicken"]) + (float64(log.ExtraFishQty) * prices["fish"]) + (float64(log.ExtraEggQty) * prices["egg"]) + (float64(log.ExtraVegetableQty) * prices["vegetable"])
 
 	tx, err := dbPool.Begin(context.Background())
 	if err != nil {
@@ -245,16 +239,19 @@ func updateDailyEntry(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	// Get current meal prices
+	prices := getMealPricesInternal()
 
 	// Calculate new cost
 	mealPrice := 0.0
 	if req.HasMainMeal {
-		mealPrice = StandardMealPrice
+		mealPrice = prices["standard"]
 		if req.IsSpecial {
-			mealPrice = SpecialMealPrice
+			mealPrice = prices["special"]
 		}
 	}
-	newTotalCost := mealPrice + (float64(req.ExtraRiceQty) * RicePricePerPlate) + (float64(req.ExtraRotiQty) * RotiPricePerPiece)
+	// Note: We only calculate basic extras as supported in the Edit feature
+	newTotalCost := mealPrice + (float64(req.ExtraRiceQty) * prices["rice"]) + (float64(req.ExtraRotiQty) * prices["roti"]) + (float64(req.ExtraChickenQty) * prices["chicken"]) + (float64(req.ExtraFishQty) * prices["fish"]) + (float64(req.ExtraEggQty) * prices["egg"]) + (float64(req.ExtraVegetableQty) * prices["vegetable"])
 
 	tx, err := dbPool.Begin(context.Background())
 	if err != nil {
@@ -718,4 +715,66 @@ func getAnalyticsStats(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(stats)
+}
+
+func getMealPricesInternal() map[string]float64 {
+	prices := make(map[string]float64)
+	rows, err := dbPool.Query(context.Background(), "SELECT ITEM_ID, PRICE FROM MEAL_PRICES")
+	if err != nil {
+		log.Printf("Failed to get meal prices: %v\n", err)
+		return prices
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var id string
+		var price float64
+		if err := rows.Scan(&id, &price); err == nil {
+			prices[id] = price
+		}
+	}
+	return prices
+}
+
+func getMealPrices(w http.ResponseWriter, r *http.Request) {
+	rows, err := dbPool.Query(context.Background(), "SELECT ITEM_ID, ITEM_NAME, PRICE, UPDATED_AT FROM MEAL_PRICES ORDER BY PRICE DESC")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	var prices []MealPrice
+	for rows.Next() {
+		var p MealPrice
+		err := rows.Scan(&p.ItemID, &p.ItemName, &p.Price, &p.UpdatedAt)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		prices = append(prices, p)
+	}
+
+	json.NewEncoder(w).Encode(prices)
+}
+
+func updateMealPrice(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+
+	var p MealPrice
+	if err := json.NewDecoder(r.Body).Decode(&p); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	_, err := dbPool.Exec(context.Background(), `
+		UPDATE MEAL_PRICES SET PRICE = $1, UPDATED_AT = CURRENT_TIMESTAMP
+		WHERE ITEM_ID = $2
+	`, p.Price, id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }

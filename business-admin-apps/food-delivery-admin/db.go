@@ -57,7 +57,36 @@ func initDB() {
             AMOUNT DECIMAL(10,2) NOT NULL,
             CREATED_AT TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
+		CREATE TABLE IF NOT EXISTS MEAL_PRICES (
+            ITEM_ID VARCHAR(50) PRIMARY KEY,
+            ITEM_NAME VARCHAR(100) NOT NULL,
+            PRICE DECIMAL(10,2) NOT NULL,
+            UPDATED_AT TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
 	`)
+	if err != nil {
+		log.Fatalf("Unable to create tables: %v\n", err)
+	}
+
+	// Initialize default meal prices if the table is empty
+	var count int
+	err = dbPool.QueryRow(context.Background(), "SELECT COUNT(*) FROM MEAL_PRICES").Scan(&count)
+	if err == nil && count == 0 {
+		_, err = dbPool.Exec(context.Background(), `
+			INSERT INTO MEAL_PRICES (ITEM_ID, ITEM_NAME, PRICE) VALUES 
+			('standard', 'Standard Meal', 52.5),
+			('special', 'Special Meal', 120.0),
+			('rice', 'Extra Rice', 10.0),
+			('roti', 'Extra Roti', 4.0),
+			('chicken', 'Extra Chicken', 30.0),
+			('fish', 'Extra Fish', 20.0),
+			('egg', 'Extra Egg', 10.0),
+			('vegetable', 'Extra Vegetable', 15.0)
+		`)
+		if err != nil {
+			log.Printf("Unable to insert default meal prices: %v\n", err)
+		}
+	}
 	if err != nil {
 		log.Fatalf("Unable to create tables: %v\n", err)
 	}

@@ -83,3 +83,10 @@ type AnalyticsStats struct {
 	TotalExpenses    float64        `json:"total_expenses"`
 	ProfitPercentage float64        `json:"profit_percentage"`
 }
+
+type MealPrice struct {
+	ItemID    string    `json:"item_id"`
+	ItemName  string    `json:"item_name"`
+	Price     float64   `json:"price"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
