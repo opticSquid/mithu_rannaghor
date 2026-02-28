@@ -1,6 +1,7 @@
 import { createSignal, onMount, For, createEffect } from 'solid-js';
 import axios from 'axios';
 import { Expense } from '../types';
+import { useI18n } from '../i18n';
 import {
     Plus,
     Trash2,
@@ -14,6 +15,7 @@ import {
 } from 'lucide-solid';
 
 const Expenses = () => {
+    const { t } = useI18n();
     const [expenses, setExpenses] = createSignal<Expense[]>([]);
     const [startDate, setStartDate] = createSignal(new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0]);
     const [endDate, setEndDate] = createSignal(new Date().toISOString().split('T')[0]);
@@ -104,15 +106,15 @@ const Expenses = () => {
         <div class="space-y-12 pb-12">
             <header class="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
-                    <h2 class="text-4xl font-black text-[var(--md-sys-color-primary)] tracking-tight">Expenses</h2>
-                    <p class="text-[var(--md-sys-color-on-surface-variant)] mt-2 text-lg">Manage miscellaneous business costs</p>
+                    <h2 class="text-4xl font-black text-[var(--md-sys-color-primary)] tracking-tight">{t('expenses')}</h2>
+                    <p class="text-[var(--md-sys-color-on-surface-variant)] mt-2 text-lg">{t('manageCosts')}</p>
                 </div>
                 <button
                     onClick={openAddModal}
                     class="btn-primary flex items-center gap-2 self-start h-[56px] !rounded-2xl"
                 >
                     <Plus size={24} />
-                    <span class="text-lg font-bold">Add Expense</span>
+                    <span class="text-lg font-bold">{t('addExpense')}</span>
                 </button>
             </header>
 
@@ -123,7 +125,7 @@ const Expenses = () => {
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-end">
                     <div class="space-y-1">
                         <label class="text-xs font-bold text-[var(--md-sys-color-primary)] ml-4 mb-1 block tracking-wider uppercase flex items-center gap-2">
-                            <Calendar size={12} /> Start Date
+                            <Calendar size={12} /> {t('startDate')}
                         </label>
                         <input
                             type="date"
@@ -134,7 +136,7 @@ const Expenses = () => {
                     </div>
                     <div class="space-y-1">
                         <label class="text-xs font-bold text-[var(--md-sys-color-primary)] ml-4 mb-1 block tracking-wider uppercase flex items-center gap-2">
-                            <Calendar size={12} /> End Date
+                            <Calendar size={12} /> {t('endDate')}
                         </label>
                         <input
                             type="date"
@@ -146,7 +148,7 @@ const Expenses = () => {
                     <div class="lg:col-span-2 flex items-center justify-end h-[56px]">
                         <div class="bg-[var(--md-sys-color-secondary-container)] text-[var(--md-sys-color-on-secondary-container)] px-6 py-3 rounded-2xl flex items-center gap-3 shadow-inner">
                             <IndianRupee size={18} class="opacity-70" />
-                            <span class="text-sm font-bold tracking-wide uppercase opacity-70">Total:</span>
+                            <span class="text-sm font-bold tracking-wide uppercase opacity-70">{t('total')}:</span>
                             <span class="text-2xl font-black">₹{expenses().reduce((sum, e) => sum + e.amount, 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                         </div>
                     </div>
@@ -159,10 +161,10 @@ const Expenses = () => {
                     <table class="w-full text-left">
                         <thead class="bg-[var(--md-sys-color-surface-container-highest)] border-b border-[var(--md-sys-color-outline-variant)]">
                             <tr>
-                                <th class="p-4 font-bold text-[var(--md-sys-color-on-surface-variant)]">Date</th>
-                                <th class="p-4 font-bold text-[var(--md-sys-color-on-surface-variant)]">Reason</th>
-                                <th class="p-4 font-bold text-[var(--md-sys-color-on-surface-variant)] text-right">Amount</th>
-                                <th class="p-4 font-bold text-[var(--md-sys-color-on-surface-variant)] text-center">Actions</th>
+                                <th class="p-4 font-bold text-[var(--md-sys-color-on-surface-variant)]">{t('date')}</th>
+                                <th class="p-4 font-bold text-[var(--md-sys-color-on-surface-variant)]">{t('reason')}</th>
+                                <th class="p-4 font-bold text-[var(--md-sys-color-on-surface-variant)] text-right">{t('amount')}</th>
+                                <th class="p-4 font-bold text-[var(--md-sys-color-on-surface-variant)] text-center">{t('actions')}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-[var(--md-sys-color-outline-variant)]">
@@ -175,7 +177,7 @@ const Expenses = () => {
                                         <td class="p-4">
                                             <div class="font-medium text-[var(--md-sys-color-on-surface)]">{expense.reason}</div>
                                             <div class="text-xs text-[var(--md-sys-color-on-surface-variant)] opacity-70">
-                                                Added: {new Date(expense.created_at).toLocaleString()}
+                                                {t('added')} {new Date(expense.created_at).toLocaleString()}
                                             </div>
                                         </td>
                                         <td class="p-4 text-right font-bold text-[var(--md-sys-color-on-surface)] text-lg">
@@ -207,7 +209,7 @@ const Expenses = () => {
                                     <td colspan="4" class="p-12 text-center text-[var(--md-sys-color-on-surface-variant)] opacity-60">
                                         <div class="flex flex-col items-center gap-2">
                                             <FileText size={48} stroke-width={1} />
-                                            <p>No expenses found for this period</p>
+                                            <p>{t('noExpenses')}</p>
                                         </div>
                                     </td>
                                 </tr>
@@ -223,7 +225,7 @@ const Expenses = () => {
                     <div class="md-card w-full max-w-md shadow-2xl zoom-in animate-in duration-300">
                         <div class="p-6 border-b border-[var(--md-sys-color-outline-variant)] flex items-center justify-between">
                             <h3 class="text-xl font-bold text-[var(--md-sys-color-on-surface)]">
-                                {editingExpense() ? 'Edit Expense' : 'Add New Expense'}
+                                {editingExpense() ? t('editExpense') : t('addExpense')}
                             </h3>
                             <button
                                 onClick={() => setShowAddModal(false)}
@@ -236,7 +238,7 @@ const Expenses = () => {
                         <form onSubmit={handleSubmit} class="p-6 space-y-6">
                             <div class="space-y-1">
                                 <label class="text-xs font-bold text-[var(--md-sys-color-primary)] ml-4 mb-1 block tracking-wider uppercase flex items-center gap-2">
-                                    <Calendar size={12} /> Date
+                                    <Calendar size={12} /> {t('date')}
                                 </label>
                                 <input
                                     type="date"
@@ -249,11 +251,11 @@ const Expenses = () => {
 
                             <div class="space-y-1">
                                 <label class="text-xs font-bold text-[var(--md-sys-color-primary)] ml-4 mb-1 block tracking-wider uppercase flex items-center gap-2">
-                                    <FileText size={12} /> Reason / Note
+                                    <FileText size={12} /> {t('reasonNote')}
                                 </label>
                                 <textarea
                                     required
-                                    placeholder="Explain what the expense was for..."
+                                    placeholder={t('explainExpense')}
                                     value={formReason()}
                                     onInput={(e) => setFormReason(e.currentTarget.value)}
                                     class="input-filled min-h-[120px] py-4 leading-relaxed"
@@ -262,7 +264,7 @@ const Expenses = () => {
 
                             <div class="space-y-1">
                                 <label class="text-xs font-bold text-[var(--md-sys-color-primary)] ml-4 mb-1 block tracking-wider uppercase flex items-center gap-2">
-                                    <IndianRupee size={12} /> Amount
+                                    <IndianRupee size={12} /> {t('amount')}
                                 </label>
                                 <input
                                     type="number"
@@ -286,7 +288,7 @@ const Expenses = () => {
                                     ) : (
                                         <>
                                             <Check size={20} stroke-width={3} />
-                                            {editingExpense() ? 'Save Changes' : 'Add Expense'}
+                                            {editingExpense() ? t('saveChanges') : t('addExpense')}
                                         </>
                                     )}
                                 </button>

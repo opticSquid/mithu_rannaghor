@@ -2,8 +2,10 @@ import { createSignal, onMount, For } from 'solid-js';
 import axios from 'axios';
 import { User } from '../types';
 import { Plus, Search, Wallet as WalletIcon } from 'lucide-solid';
+import { useI18n } from '../i18n';
 
 const Customers = () => {
+    const { t } = useI18n();
     const [users, setUsers] = createSignal<User[]>([]);
     const [searchTerm, setSearchTerm] = createSignal('');
     const [showAddModal, setShowAddModal] = createSignal(false);
@@ -29,14 +31,14 @@ const Customers = () => {
         <div class="space-y-8 animate-in slide-in-from-bottom duration-500">
             <header class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h2 class="text-3xl font-bold text-white">Customers</h2>
-                    <p class="text-text-dim mt-2">Manage your subscribers and their balances</p>
+                    <h2 class="text-3xl font-bold text-white">{t('customers')}</h2>
+                    <p class="text-text-dim mt-2">{t('manageSubscribers')}</p>
                 </div>
                 <button
                     onClick={() => setShowAddModal(true)}
                     class="btn btn-primary"
                 >
-                    <Plus size={20} /> Add New Customer
+                    <Plus size={20} /> {t('addNewCustomer')}
                 </button>
             </header>
 
@@ -44,7 +46,7 @@ const Customers = () => {
                 <Search size={20} class="text-text-dim ml-2" />
                 <input
                     type="text"
-                    placeholder="Search customers by name or phone..."
+                    placeholder={t('searchCustomers')}
                     class="bg-transparent border-none outline-none text-white w-full placeholder:text-text-dim"
                     onInput={(e) => setSearchTerm(e.currentTarget.value)}
                 />
@@ -66,15 +68,15 @@ const Customers = () => {
 
                             <div class="space-y-3 pt-4 border-t border-white/5">
                                 <div class="flex justify-between text-sm">
-                                    <span class="text-text-dim">Location</span>
+                                    <span class="text-text-dim">{t('location')}</span>
                                     <span>{user.building_no}, {user.room_no}</span>
                                 </div>
                                 <div class="flex justify-between text-sm">
-                                    <span class="text-text-dim">Plan</span>
-                                    <span class="capitalize text-accent font-medium">{user.plan}</span>
+                                    <span class="text-text-dim">{t('plan')}</span>
+                                    <span class="capitalize text-accent font-medium">{user.plan === 'monthly' ? t('monthly') : t('oneOff')}</span>
                                 </div>
                                 <div class="flex justify-between items-center bg-white/5 p-3 rounded-xl mt-4">
-                                    <span class="text-xs font-semibold uppercase tracking-wider text-text-dim">Wallet</span>
+                                    <span class="text-xs font-semibold uppercase tracking-wider text-text-dim">{t('wallet')}</span>
                                     <span class={`text-lg font-bold ${user.balance < 0 ? 'text-error' : 'text-success'}`}>
                                         ₹{user.balance.toFixed(2)}
                                     </span>
@@ -86,7 +88,7 @@ const Customers = () => {
                                     onClick={() => setShowRechargeModal(user)}
                                     class="flex-1 btn bg-white/5 hover:bg-white/10 text-white border border-white/10 flex items-center justify-center gap-2"
                                 >
-                                    <WalletIcon size={18} /> Recharge
+                                    <WalletIcon size={18} /> {t('recharge')}
                                 </button>
                             </div>
                         </div>
@@ -96,14 +98,14 @@ const Customers = () => {
 
             {/* Add User Modal */}
             {showAddModal() && (
-                <Modal title="Add New Customer" onClose={() => setShowAddModal(false)}>
+                <Modal title={t('addNewCustomer')} onClose={() => setShowAddModal(false)}>
                     <AddUserForm onSuccess={() => { setShowAddModal(false); fetchUsers(); }} />
                 </Modal>
             )}
 
             {/* Recharge Modal */}
             {showRechargeModal() && (
-                <Modal title={`Recharge Wallet: ${showRechargeModal()?.name}`} onClose={() => setShowRechargeModal(null)}>
+                <Modal title={`${t('rechargeWallet')}: ${showRechargeModal()?.name}`} onClose={() => setShowRechargeModal(null)}>
                     <RechargeForm user={showRechargeModal()!} onSuccess={() => { setShowRechargeModal(null); fetchUsers(); }} />
                 </Modal>
             )}
@@ -124,6 +126,7 @@ const Modal = (props: { title: string; children: any; onClose: () => void }) => 
 );
 
 const AddUserForm = (props: { onSuccess: () => void }) => {
+    const { t } = useI18n();
     const [formData, setFormData] = createSignal({
         name: '',
         mobile_no: '',
@@ -145,7 +148,7 @@ const AddUserForm = (props: { onSuccess: () => void }) => {
     return (
         <form onSubmit={handleSubmit} class="space-y-4">
             <div>
-                <label class="block text-sm font-medium text-text-dim mb-1">Full Name</label>
+                <label class="block text-sm font-medium text-text-dim mb-1">{t('fullName')}</label>
                 <input
                     class="input"
                     required
@@ -153,7 +156,7 @@ const AddUserForm = (props: { onSuccess: () => void }) => {
                 />
             </div>
             <div>
-                <label class="block text-sm font-medium text-text-dim mb-1">Mobile Number</label>
+                <label class="block text-sm font-medium text-text-dim mb-1">{t('mobileNumber')}</label>
                 <input
                     class="input"
                     required
@@ -162,7 +165,7 @@ const AddUserForm = (props: { onSuccess: () => void }) => {
             </div>
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-text-dim mb-1">Building No</label>
+                    <label class="block text-sm font-medium text-text-dim mb-1">{t('buildingNo')}</label>
                     <input
                         class="input"
                         required
@@ -170,7 +173,7 @@ const AddUserForm = (props: { onSuccess: () => void }) => {
                     />
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-text-dim mb-1">Room No</label>
+                    <label class="block text-sm font-medium text-text-dim mb-1">{t('roomNo')}</label>
                     <input
                         class="input"
                         required
@@ -179,21 +182,22 @@ const AddUserForm = (props: { onSuccess: () => void }) => {
                 </div>
             </div>
             <div>
-                <label class="block text-sm font-medium text-text-dim mb-1">Plan Type</label>
+                <label class="block text-sm font-medium text-text-dim mb-1">{t('planType')}</label>
                 <select
                     class="input bg-surface"
                     onInput={e => setFormData({ ...formData(), plan: e.currentTarget.value as any })}
                 >
-                    <option value="monthly">Monthly</option>
-                    <option value="one_off">One-off</option>
+                    <option value="monthly">{t('monthly')}</option>
+                    <option value="one_off">{t('oneOff')}</option>
                 </select>
             </div>
-            <button type="submit" class="btn btn-primary w-full mt-4">Save Customer</button>
+            <button type="submit" class="btn btn-primary w-full mt-4">{t('saveCustomer')}</button>
         </form>
     );
 };
 
 const RechargeForm = (props: { user: User; onSuccess: () => void }) => {
+    const { t } = useI18n();
     const [amount, setAmount] = createSignal('');
     const [refId, setRefId] = createSignal('');
 
@@ -231,7 +235,7 @@ const RechargeForm = (props: { user: User; onSuccess: () => void }) => {
     return (
         <form onSubmit={handleSubmit} class="space-y-4">
             <div>
-                <label class="block text-sm font-medium text-text-dim mb-1">Amount (₹)</label>
+                <label class="block text-sm font-medium text-text-dim mb-1">{t('amountReq')}</label>
                 <input
                     type="text"
                     inputMode='decimal'
@@ -241,7 +245,7 @@ const RechargeForm = (props: { user: User; onSuccess: () => void }) => {
                 />
             </div>
             <div>
-                <label class="block text-sm font-medium text-text-dim mb-1">Transaction Date & Time</label>
+                <label class="block text-sm font-medium text-text-dim mb-1">{t('txnDateTime')}</label>
                 <input
                     type="datetime-local"
                     class="input"
@@ -251,15 +255,15 @@ const RechargeForm = (props: { user: User; onSuccess: () => void }) => {
                 />
             </div>
             <div>
-                <label class="block text-sm font-medium text-text-dim mb-1">Payment Reference (UPI/UTR)</label>
+                <label class="block text-sm font-medium text-text-dim mb-1">{t('paymentRef')}</label>
                 <input
                     class="input"
                     required
-                    placeholder="Optional"
+                    placeholder={t('optional')}
                     onInput={e => setRefId(e.currentTarget.value)}
                 />
             </div>
-            <button type="submit" class="btn btn-primary w-full mt-4">Confirm Recharge</button>
+            <button type="submit" class="btn btn-primary w-full mt-4">{t('confirmRecharge')}</button>
         </form>
     );
 };

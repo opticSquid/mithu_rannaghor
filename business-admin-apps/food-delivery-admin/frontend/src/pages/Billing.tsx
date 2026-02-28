@@ -4,8 +4,10 @@ import { User, BillReport } from '../types';
 import { Download, FileText, Calendar, Search } from 'lucide-solid';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
+import { useI18n } from '../i18n';
 
 const Billing = () => {
+    const { t } = useI18n();
     const [users, setUsers] = createSignal<User[]>([]);
     const [selectedUser, setSelectedUser] = createSignal<string>('');
     const [startDate, setStartDate] = createSignal(new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0]);
@@ -95,26 +97,26 @@ const Billing = () => {
     return (
         <div class="space-y-8 animate-in fade-in duration-700">
             <header>
-                <h2 class="text-3xl font-bold text-white">Billing & Reports</h2>
-                <p class="text-text-dim mt-2">Generate and export customer invoices</p>
+                <h2 class="text-3xl font-bold text-white">{t('billingAndReports')}</h2>
+                <p class="text-text-dim mt-2">{t('generateAndExport')}</p>
             </header>
 
             <div class="glass p-6 grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                 <div class="md:col-span-1">
-                    <label class="block text-xs font-bold uppercase tracking-widest text-text-dim mb-2">Customer</label>
+                    <label class="block text-xs font-bold uppercase tracking-widest text-text-dim mb-2">{t('customer')}</label>
                     <select
                         class="input bg-surface"
                         value={selectedUser()}
                         onInput={e => setSelectedUser(e.currentTarget.value)}
                     >
-                        <option value="">Select customer...</option>
+                        <option value="">{t('selectCustomer')}</option>
                         <For each={users()}>
                             {(user) => <option value={user.user_id}>{user.name}</option>}
                         </For>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold uppercase tracking-widest text-text-dim mb-2">From</label>
+                    <label class="block text-xs font-bold uppercase tracking-widest text-text-dim mb-2">{t('from')}</label>
                     <input
                         type="date"
                         class="input"
@@ -123,7 +125,7 @@ const Billing = () => {
                     />
                 </div>
                 <div>
-                    <label class="block text-xs font-bold uppercase tracking-widest text-text-dim mb-2">To</label>
+                    <label class="block text-xs font-bold uppercase tracking-widest text-text-dim mb-2">{t('to')}</label>
                     <input
                         type="date"
                         class="input"
@@ -136,7 +138,7 @@ const Billing = () => {
                     disabled={isLoading() || !selectedUser()}
                     class="btn btn-primary w-full h-[46px]"
                 >
-                    {isLoading() ? 'Generating...' : 'Generate Bill'}
+                    {isLoading() ? t('generating') : t('generateBill')}
                 </button>
             </div>
 
@@ -144,7 +146,7 @@ const Billing = () => {
                 <div class="animate-in slide-in-from-bottom duration-500">
                     <div class="flex justify-end mb-4">
                         <button onClick={exportPDF} class="bg-[var(--md-sys-color-secondary-container)] text-[var(--md-sys-color-on-secondary-container)] hover:brightness-95 active:scale-95 flex items-center gap-2 rounded-xl px-6 py-3 font-medium transition-all shadow-sm hover:shadow-md">
-                            <Download size={18} /> Download PDF
+                            <Download size={18} /> {t('downloadPdf')}
                         </button>
                     </div>
 
@@ -156,12 +158,12 @@ const Billing = () => {
                                     <div class="w-12 h-12 bg-indigo-600 rounded-lg flex items-center justify-center">
                                         <span class="text-white font-black text-2xl">R</span>
                                     </div>
-                                    <h1 class="text-2xl font-black text-indigo-900 tracking-tight">Ranjitar Rannaghor</h1>
+                                    <h1 class="text-2xl font-black text-indigo-900 tracking-tight">{t('adminSubtitle')}</h1>
                                 </div>
-                                <p class="text-slate-500 text-sm max-w-xs">Home cooked fresh meals delivered to your doorstep. Healthy, hygienic, and tasty.</p>
+                                <p class="text-slate-500 text-sm max-w-xs">{t('homeCookedSubtitle')}</p>
                             </div>
                             <div class="text-right">
-                                <h2 class="text-3xl font-bold text-slate-800 uppercase tracking-tighter">Invoice</h2>
+                                <h2 class="text-3xl font-bold text-slate-800 uppercase tracking-tighter">{t('invoice')}</h2>
                                 <p class="text-slate-400 mt-1 font-medium">#{report()?.user.user_id}-{new Date().getTime().toString().slice(-6)}</p>
                                 <div class="mt-4 text-sm text-center font-bold text-indigo-600 bg-indigo-50 px-4 py-2 rounded-xl whitespace-nowrap">
                                     {new Date(startDate()).toLocaleDateString()} - {new Date(endDate()).toLocaleDateString()}
@@ -172,17 +174,17 @@ const Billing = () => {
                         {/* Bill Info */}
                         <div class="grid grid-cols-2 gap-12 mb-12">
                             <div>
-                                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Bill To:</h4>
+                                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">{t('billTo')}</h4>
                                 <p class="text-xl font-bold text-slate-800">{report()?.user.name}</p>
                                 <p class="text-slate-500">{report()?.user.mobile_no}</p>
                                 <p class="text-slate-500 mt-1">{report()?.user.building_no}, {report()?.user.room_no}</p>
                             </div>
                             <div class="text-right">
-                                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Summary:</h4>
+                                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">{t('summary')}</h4>
                                 <div class="space-y-1">
-                                    <p class="text-slate-500">Opening Balance: <span class="text-slate-800 font-bold">₹{report()?.opening_balance.toFixed(2)}</span></p>
-                                    <p class="text-slate-500">Total Billable: <span class="text-slate-800 font-bold">₹{report()?.total_spent.toFixed(2)}</span></p>
-                                    <p class="text-slate-500">Recharges: <span class="text-slate-800 font-bold">₹{report()?.total_recharges.toFixed(2)}</span></p>
+                                    <p class="text-slate-500">{t('openingBalance')} <span class="text-slate-800 font-bold">₹{report()?.opening_balance.toFixed(2)}</span></p>
+                                    <p class="text-slate-500">{t('totalBillable')} <span class="text-slate-800 font-bold">₹{report()?.total_spent.toFixed(2)}</span></p>
+                                    <p class="text-slate-500">{t('recharges')} <span class="text-slate-800 font-bold">₹{report()?.total_recharges.toFixed(2)}</span></p>
                                 </div>
                             </div>
                         </div>
@@ -191,10 +193,10 @@ const Billing = () => {
                         <table class="w-full mb-12">
                             <thead>
                                 <tr class="bg-slate-50 text-slate-500 text-left">
-                                    <th class="py-3 px-4 font-bold text-xs uppercase tracking-wider">Date</th>
-                                    <th class="py-3 px-4 font-bold text-xs uppercase tracking-wider">Meal</th>
-                                    <th class="py-3 px-4 font-bold text-xs uppercase tracking-wider">Details</th>
-                                    <th class="py-3 px-4 font-bold text-xs uppercase tracking-wider text-right">Amount</th>
+                                    <th class="py-3 px-4 font-bold text-xs uppercase tracking-wider">{t('date')}</th>
+                                    <th class="py-3 px-4 font-bold text-xs uppercase tracking-wider">{t('meal')}</th>
+                                    <th class="py-3 px-4 font-bold text-xs uppercase tracking-wider">{t('details')}</th>
+                                    <th class="py-3 px-4 font-bold text-xs uppercase tracking-wider text-right">{t('amount')}</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100">
@@ -208,17 +210,17 @@ const Billing = () => {
                                                     log.is_special ? (
                                                         <span class="font-bold text-indigo-600">{log.special_dish_name} (S) </span>
                                                     ) : (
-                                                        'Standard '
+                                                        t('standard')
                                                     )
                                                 ) : (
-                                                    <span class="text-slate-500 italic font-medium">A La Carte </span>
+                                                    <span class="text-slate-500 italic font-medium">{t('aLaCarte')}</span>
                                                 )}
-                                                {log.extra_rice_qty > 0 && <span class="text-slate-400">+ Rice ({log.extra_rice_qty}) </span>}
-                                                {log.extra_roti_qty > 0 && <span class="text-slate-400">+ Roti ({log.extra_roti_qty}) </span>}
-                                                {log.extra_chicken_qty > 0 && <span class="text-slate-400">+ Chicken ({log.extra_chicken_qty}) </span>}
-                                                {log.extra_fish_qty > 0 && <span class="text-slate-400">+ Fish ({log.extra_fish_qty}) </span>}
-                                                {log.extra_egg_qty > 0 && <span class="text-slate-400">+ Egg ({log.extra_egg_qty}) </span>}
-                                                {log.extra_vegetable_qty > 0 && <span class="text-slate-400">+ Vegetable ({log.extra_vegetable_qty}) </span>}
+                                                {log.extra_rice_qty > 0 && <span class="text-slate-400">+ {t('rice')} ({log.extra_rice_qty}) </span>}
+                                                {log.extra_roti_qty > 0 && <span class="text-slate-400">+ {t('roti')} ({log.extra_roti_qty}) </span>}
+                                                {log.extra_chicken_qty > 0 && <span class="text-slate-400">+ {t('chicken')} ({log.extra_chicken_qty}) </span>}
+                                                {log.extra_fish_qty > 0 && <span class="text-slate-400">+ {t('fish')} ({log.extra_fish_qty}) </span>}
+                                                {log.extra_egg_qty > 0 && <span class="text-slate-400">+ {t('egg')} ({log.extra_egg_qty}) </span>}
+                                                {log.extra_vegetable_qty > 0 && <span class="text-slate-400">+ {t('vegetable')} ({log.extra_vegetable_qty}) </span>}
                                             </td>
                                             <td class="py-4 px-4 text-sm font-bold text-right">₹{log.total_cost.toFixed(2)}</td>
                                         </tr>
@@ -231,23 +233,23 @@ const Billing = () => {
                         <div class="flex justify-end pt-8 border-t-2 border-slate-100">
                             <div class="w-64 space-y-4">
                                 <div class="flex justify-between text-slate-500 font-medium">
-                                    <span>Subtotal</span>
+                                    <span>{t('subtotal')}</span>
                                     <span>₹{report()?.total_spent.toFixed(2)}</span>
                                 </div>
                                 <div class="flex justify-between text-2xl font-black text-indigo-900 border-t border-slate-100 pt-4">
-                                    <span>Total</span>
+                                    <span>{t('total')}</span>
                                     <span>₹{report()?.total_spent.toFixed(2)}</span>
                                 </div>
                                 <div class={`p-4 rounded-xl mt-4 flex justify-between ${report()!.closing_balance < 0 ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700'}`}>
-                                    <span class="text-xs font-bold uppercase">Balance Status</span>
+                                    <span class="text-xs font-bold uppercase">{t('balanceStatus')}</span>
                                     <span class="font-bold">₹{report()?.closing_balance.toFixed(2)}</span>
                                 </div>
                             </div>
                         </div>
 
                         <div class="mt-20 text-center border-t border-slate-100 pt-8 opacity-40 grayscale">
-                            <p class="text-xs font-bold uppercase tracking-[0.2em] mb-2 text-slate-400">Generated via Ranjitar Rannaghor Admin Panel</p>
-                            <p class="text-[10px] text-slate-400">Thank you for Choosing Home Cooked Goodness.</p>
+                            <p class="text-xs font-bold uppercase tracking-[0.2em] mb-2 text-slate-400">{t('generatedVia')}</p>
+                            <p class="text-[10px] text-slate-400">{t('thankYou')}</p>
                         </div>
                     </div>
                 </div>

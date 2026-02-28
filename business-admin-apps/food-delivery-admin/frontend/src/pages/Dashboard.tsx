@@ -2,8 +2,10 @@ import { createSignal, onMount, For } from 'solid-js';
 import axios from 'axios';
 import { User, DashboardStats } from '../types';
 import { Users, ArrowDownCircle, ArrowUpCircle, IndianRupee } from 'lucide-solid';
+import { useI18n } from '../i18n';
 
 const Dashboard = () => {
+    const { t } = useI18n();
     const [users, setUsers] = createSignal<User[]>([]);
     const [stats, setStats] = createSignal<DashboardStats | null>(null);
 
@@ -23,54 +25,54 @@ const Dashboard = () => {
     return (
         <div class="space-y-8 animate-in fade-in duration-700">
             <header>
-                <h2 class="text-3xl font-bold text-white">Dashboard</h2>
-                <p class="text-text-dim mt-2">Welcome back to Ranjitar Rannaghor Admin</p>
+                <h2 class="text-3xl font-bold text-white">{t('dashboard')}</h2>
+                <p class="text-text-dim mt-2">{t('welcomeBack')}</p>
             </header>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatCard
                     icon={Users}
-                    label="Active Customers"
+                    label={t('activeCustomers')}
                     value={stats()?.active_customers.toString() || '0'}
-                    trend="Total Subscribers"
+                    trend={t('totalSubscribers')}
                     color="from-blue-500 to-cyan-400"
                 />
                 <StatCard
                     icon={ArrowUpCircle}
-                    label="Monthly Revenue"
+                    label={t('monthlyRevenue')}
                     value={`₹${stats()?.monthly_revenue.toLocaleString('en-IN') || '0'}`}
-                    trend="This Month"
+                    trend={t('thisMonth')}
                     color="from-emerald-500 to-teal-400"
                 />
                 <StatCard
                     icon={ArrowDownCircle}
-                    label="Monthly Expenses"
+                    label={t('monthlyExpenses')}
                     value={`₹${stats()?.monthly_expenses.toLocaleString('en-IN') || '0'}`}
-                    trend="This Month"
+                    trend={t('thisMonth')}
                     color="from-rose-500 to-orange-400"
                 />
                 <StatCard
                     icon={IndianRupee}
-                    label="Net Profit"
+                    label={t('netProfit')}
                     value={`₹${stats()?.net_profit.toLocaleString('en-IN') || '0'}`}
-                    trend="All Time"
+                    trend={t('allTime')}
                     color="from-purple-500 to-indigo-400"
                 />
             </div>
 
             <div class="glass p-6">
                 <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-xl font-bold">Recent Customers</h3>
-                    <button class="text-primary hover:underline font-medium">View All</button>
+                    <h3 class="text-xl font-bold">{t('recentCustomers')}</h3>
+                    <button class="text-primary hover:underline font-medium">{t('viewAll')}</button>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left">
                         <thead>
                             <tr class="text-text-dim border-b border-surface-border">
-                                <th class="pb-4 font-semibold uppercase text-xs tracking-wider">Name</th>
-                                <th class="pb-4 font-semibold uppercase text-xs tracking-wider">Plan</th>
-                                <th class="pb-4 font-semibold uppercase text-xs tracking-wider">Wallet Balance</th>
-                                <th class="pb-4 font-semibold uppercase text-xs tracking-wider">Location</th>
+                                <th class="pb-4 font-semibold uppercase text-xs tracking-wider">{t('name')}</th>
+                                <th class="pb-4 font-semibold uppercase text-xs tracking-wider">{t('plan')}</th>
+                                <th class="pb-4 font-semibold uppercase text-xs tracking-wider">{t('walletBalance')}</th>
+                                <th class="pb-4 font-semibold uppercase text-xs tracking-wider">{t('location')}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-surface-border">

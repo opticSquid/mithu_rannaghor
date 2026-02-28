@@ -2,9 +2,10 @@ import axios from 'axios';
 import { Check, ChefHat, Moon, Salad, SquarePen, Sun, Trash2, Utensils, X } from 'lucide-solid';
 import { For, createEffect, createSignal, onMount } from 'solid-js';
 import { DailyLog, User } from '../types';
-
+import { useI18n } from '../i18n';
 
 const DailyEntry = () => {
+    const { t } = useI18n();
     const [users, setUsers] = createSignal<User[]>([]);
     const [logs, setLogs] = createSignal<DailyLog[]>([]);
     const [selectedUser, setSelectedUser] = createSignal<string>('');
@@ -110,8 +111,8 @@ const DailyEntry = () => {
     return (
         <div class="max-w-xl mx-auto py-8 animate-in slide-in-from-bottom">
             <header class="mb-8 text-center">
-                <h2 class="text-4xl font-black text-[var(--md-sys-color-primary)] tracking-tight">Daily Entry</h2>
-                <p class="text-[var(--md-sys-color-on-surface-variant)] mt-2 text-lg">Record today's consumption</p>
+                <h2 class="text-4xl font-black text-[var(--md-sys-color-primary)] tracking-tight">{t('dailyEntry')}</h2>
+                <p class="text-[var(--md-sys-color-on-surface-variant)] mt-2 text-lg">{t('recordConsumption')}</p>
             </header>
 
             <form onSubmit={handleSubmit} class="md-card flex flex-col gap-6 shadow-2xl relative overflow-hidden">
@@ -121,7 +122,7 @@ const DailyEntry = () => {
                 {/* Date & Shift Group */}
                 <div class="flex gap-4">
                     <div class="flex-1">
-                        <label class="text-xs font-bold text-[var(--md-sys-color-primary)] ml-4 mb-1 block tracking-wider uppercase">Date</label>
+                        <label class="text-xs font-bold text-[var(--md-sys-color-primary)] ml-4 mb-1 block tracking-wider uppercase">{t('date')}</label>
                         <input
                             type="date"
                             class="input-filled"
@@ -130,21 +131,21 @@ const DailyEntry = () => {
                         />
                     </div>
                     <div class="flex-1">
-                        <label class="text-xs font-bold text-[var(--md-sys-color-primary)] ml-4 mb-1 block tracking-wider uppercase">Shift</label>
+                        <label class="text-xs font-bold text-[var(--md-sys-color-primary)] ml-4 mb-1 block tracking-wider uppercase">{t('shift')}</label>
                         <div class="bg-[var(--md-sys-color-surface-container-highest)] rounded-full p-1 flex h-[56px] items-center">
                             <button
                                 type="button"
                                 onClick={() => setMealType('lunch')}
                                 class={`flex-1 h-full rounded-full text-sm font-bold flex items-center justify-center gap-2 transition-all ${mealType() === 'lunch' ? 'bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] shadow-md' : 'text-[var(--md-sys-color-on-surface-variant)] hover:bg-white/5'}`}
                             >
-                                <Sun size={16} /> Lunch
+                                <Sun size={16} /> {t('lunch')}
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setMealType('dinner')}
                                 class={`flex-1 h-full rounded-full text-sm font-bold flex items-center justify-center gap-2 transition-all ${mealType() === 'dinner' ? 'bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] shadow-md' : 'text-[var(--md-sys-color-on-surface-variant)] hover:bg-white/5'}`}
                             >
-                                <Moon size={16} /> Dinner
+                                <Moon size={16} /> {t('dinner')}
                             </button>
                         </div>
                     </div>
@@ -152,7 +153,7 @@ const DailyEntry = () => {
 
                 {/* Customer Select */}
                 <div>
-                    <label class="text-xs font-bold text-[var(--md-sys-color-primary)] ml-4 mb-1 block tracking-wider uppercase">Customer</label>
+                    <label class="text-xs font-bold text-[var(--md-sys-color-primary)] ml-4 mb-1 block tracking-wider uppercase">{t('customer')}</label>
                     <div class="relative">
                         <select
                             class="input-filled appearance-none cursor-pointer"
@@ -160,7 +161,7 @@ const DailyEntry = () => {
                             value={selectedUser()}
                             onInput={e => setSelectedUser(e.currentTarget.value)}
                         >
-                            <option value="">Select a customer...</option>
+                            <option value="">{t('selectCustomer')}</option>
                             <For each={users()}>
                                 {(user) => (
                                     <option value={user.user_id}>
@@ -177,7 +178,7 @@ const DailyEntry = () => {
 
                 {/* Meal Selection Cards */}
                 <div>
-                    <label class="text-xs font-bold text-[var(--md-sys-color-primary)] ml-4 mb-3 block tracking-wider uppercase">Meal Type</label>
+                    <label class="text-xs font-bold text-[var(--md-sys-color-primary)] ml-4 mb-3 block tracking-wider uppercase">{t('mealType')}</label>
                     <div class="grid grid-cols-3 gap-3">
                         {/* Standard */}
                         <label class={`relative flex flex-col items-center p-4 rounded-[20px] cursor-pointer transition-all duration-300 border-2 ${mealCategory() === 'standard'
@@ -186,7 +187,7 @@ const DailyEntry = () => {
                             }`}>
                             <input type="radio" name="cat" class="hidden" checked={mealCategory() === 'standard'} onChange={() => setMealCategory('standard')} />
                             <Utensils size={24} class="mb-2" />
-                            <span class="text-sm font-bold">Standard</span>
+                            <span class="text-sm font-bold">{t('standard')}</span>
                             <span class="text-[10px] opacity-80 mt-1">₹52.5</span>
                         </label>
 
@@ -208,8 +209,8 @@ const DailyEntry = () => {
                             }`}>
                             <input type="radio" name="cat" class="hidden" checked={mealCategory() === 'none'} onChange={() => setMealCategory('none')} />
                             <Salad size={24} class="mb-2" />
-                            <span class="text-sm font-bold">A La Carte</span>
-                            <span class="text-[10px] opacity-80 mt-1">Extras Only</span>
+                            <span class="text-sm font-bold">{t('aLaCarte')}</span>
+                            <span class="text-[10px] opacity-80 mt-1">{t('extrasOnly')}</span>
                         </label>
                     </div>
                 </div>
@@ -217,10 +218,10 @@ const DailyEntry = () => {
                 {/* Special Dish Input */}
                 {mealCategory() === 'special' && (
                     <div class="animate-in fade-in slide-in-from-bottom duration-300">
-                        <label class="text-xs font-bold text-[var(--md-sys-color-tertiary)] ml-4 mb-1 block tracking-wider uppercase">Dish Name</label>
+                        <label class="text-xs font-bold text-[var(--md-sys-color-tertiary)] ml-4 mb-1 block tracking-wider uppercase">{t('dishName')}</label>
                         <input
                             class="input-filled !border-b-[var(--md-sys-color-tertiary)]" // Override border color for tertiary feel
-                            placeholder="e.g. Mutton Curry..."
+                            placeholder={t('egMutton')}
                             required
                             value={specialDish()}
                             onInput={e => setSpecialDish(e.currentTarget.value)}
@@ -230,11 +231,11 @@ const DailyEntry = () => {
 
                 {/* Extras */}
                 <div class="pt-4 border-t border-[var(--md-sys-color-outline-variant)]">
-                    <h4 class="text-sm font-bold text-[var(--md-sys-color-on-surface-variant)] mb-4 uppercase tracking-wider ml-4">Extras</h4>
+                    <h4 class="text-sm font-bold text-[var(--md-sys-color-on-surface-variant)] mb-4 uppercase tracking-wider ml-4">{t('extras')}</h4>
                     <div class="grid grid-cols-2 gap-4">
                         {/* Rice */}
                         <div class="bg-[var(--md-sys-color-surface-container-high)] p-4 rounded-2xl flex flex-col items-center">
-                            <span class="text-xs font-medium text-[var(--md-sys-color-on-surface-variant)] mb-2">Extra Rice (₹10)</span>
+                            <span class="text-xs font-medium text-[var(--md-sys-color-on-surface-variant)] mb-2">{t('rice')} (₹10)</span>
                             <div class="flex items-center gap-4">
                                 <button type="button" onClick={() => setExtraRice(Math.max(0, extraRice() - 1))} class="w-10 h-10 rounded-full bg-[var(--md-sys-color-surface-container-highest)] hover:bg-[var(--md-sys-color-primary-container)] hover:text-[var(--md-sys-color-on-primary-container)] transition-colors flex items-center justify-center font-bold text-xl">-</button>
                                 <span class="text-xl font-bold w-6 text-center">{extraRice()}</span>
@@ -243,7 +244,7 @@ const DailyEntry = () => {
                         </div>
                         {/* Roti */}
                         <div class="bg-[var(--md-sys-color-surface-container-high)] p-4 rounded-2xl flex flex-col items-center">
-                            <span class="text-xs font-medium text-[var(--md-sys-color-on-surface-variant)] mb-2">Extra Roti (₹4)</span>
+                            <span class="text-xs font-medium text-[var(--md-sys-color-on-surface-variant)] mb-2">{t('roti')} (₹4)</span>
                             <div class="flex items-center gap-4">
                                 <button type="button" onClick={() => setExtraRoti(Math.max(0, extraRoti() - 1))} class="w-10 h-10 rounded-full bg-[var(--md-sys-color-surface-container-highest)] hover:bg-[var(--md-sys-color-primary-container)] hover:text-[var(--md-sys-color-on-primary-container)] transition-colors flex items-center justify-center font-bold text-xl">-</button>
                                 <span class="text-xl font-bold w-6 text-center">{extraRoti()}</span>
@@ -252,7 +253,7 @@ const DailyEntry = () => {
                         </div>
                         {/* Chicken */}
                         <div class="bg-[var(--md-sys-color-surface-container-high)] p-4 rounded-2xl flex flex-col items-center">
-                            <span class="text-xs font-medium text-[var(--md-sys-color-on-surface-variant)] mb-2">Extra Chicken (₹30)</span>
+                            <span class="text-xs font-medium text-[var(--md-sys-color-on-surface-variant)] mb-2">{t('chicken')} (₹30)</span>
                             <div class="flex items-center gap-4">
                                 <button type="button" onClick={() => setExtraChicken(Math.max(0, extraChicken() - 1))} class="w-10 h-10 rounded-full bg-[var(--md-sys-color-surface-container-highest)] hover:bg-[var(--md-sys-color-primary-container)] hover:text-[var(--md-sys-color-on-primary-container)] transition-colors flex items-center justify-center font-bold text-xl">-</button>
                                 <span class="text-xl font-bold w-6 text-center">{extraChicken()}</span>
@@ -261,7 +262,7 @@ const DailyEntry = () => {
                         </div>
                         {/* Fish */}
                         <div class="bg-[var(--md-sys-color-surface-container-high)] p-4 rounded-2xl flex flex-col items-center">
-                            <span class="text-xs font-medium text-[var(--md-sys-color-on-surface-variant)] mb-2">Extra Fish (₹20)</span>
+                            <span class="text-xs font-medium text-[var(--md-sys-color-on-surface-variant)] mb-2">{t('fish')} (₹20)</span>
                             <div class="flex items-center gap-4">
                                 <button type="button" onClick={() => setExtraFish(Math.max(0, extraFish() - 1))} class="w-10 h-10 rounded-full bg-[var(--md-sys-color-surface-container-highest)] hover:bg-[var(--md-sys-color-primary-container)] hover:text-[var(--md-sys-color-on-primary-container)] transition-colors flex items-center justify-center font-bold text-xl">-</button>
                                 <span class="text-xl font-bold w-6 text-center">{extraFish()}</span>
@@ -270,7 +271,7 @@ const DailyEntry = () => {
                         </div>
                         {/* Egg */}
                         <div class="bg-[var(--md-sys-color-surface-container-high)] p-4 rounded-2xl flex flex-col items-center">
-                            <span class="text-xs font-medium text-[var(--md-sys-color-on-surface-variant)] mb-2">Extra Egg (₹10)</span>
+                            <span class="text-xs font-medium text-[var(--md-sys-color-on-surface-variant)] mb-2">{t('egg')} (₹10)</span>
                             <div class="flex items-center gap-4">
                                 <button type="button" onClick={() => setExtraEgg(Math.max(0, extraEgg() - 1))} class="w-10 h-10 rounded-full bg-[var(--md-sys-color-surface-container-highest)] hover:bg-[var(--md-sys-color-primary-container)] hover:text-[var(--md-sys-color-on-primary-container)] transition-colors flex items-center justify-center font-bold text-xl">-</button>
                                 <span class="text-xl font-bold w-6 text-center">{extraEgg()}</span>
@@ -279,7 +280,7 @@ const DailyEntry = () => {
                         </div>
                         {/* Vegetable */}
                         <div class="bg-[var(--md-sys-color-surface-container-high)] p-4 rounded-2xl flex flex-col items-center">
-                            <span class="text-xs font-medium text-[var(--md-sys-color-on-surface-variant)] mb-2">Extra Vegetable (₹15)</span>
+                            <span class="text-xs font-medium text-[var(--md-sys-color-on-surface-variant)] mb-2">{t('vegetable')} (₹15)</span>
                             <div class="flex items-center gap-4">
                                 <button type="button" onClick={() => setExtraVegetable(Math.max(0, extraVegetable() - 1))} class="w-10 h-10 rounded-full bg-[var(--md-sys-color-surface-container-highest)] hover:bg-[var(--md-sys-color-primary-container)] hover:text-[var(--md-sys-color-on-primary-container)] transition-colors flex items-center justify-center font-bold text-xl">-</button>
                                 <span class="text-xl font-bold w-6 text-center">{extraVegetable()}</span>
@@ -297,7 +298,7 @@ const DailyEntry = () => {
                     >
                         <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
                         <span class="relative flex items-center gap-2">
-                            {isSubmitting() ? 'Recording...' : <><Check size={20} class="stroke-[3]" /> Record Entry</>}
+                            {isSubmitting() ? t('recording') : <><Check size={20} class="stroke-[3]" /> {t('recordEntry')}</>}
                         </span>
                     </button>
                 </div>
@@ -309,18 +310,18 @@ const DailyEntry = () => {
                     <span class="bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] px-2 py-1 rounded-lg text-sm">
                         {date()}
                     </span>
-                    Entries
+                    {t('entries')}
                 </h3>
 
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm">
                         <thead class="bg-[var(--md-sys-color-surface-container-highest)] text-[var(--md-sys-color-on-surface-variant)]">
                             <tr>
-                                <th class="p-3 rounded-l-xl">Customer</th>
-                                <th class="p-3">Meal</th>
-                                <th class="p-3">Details</th>
-                                <th class="p-3 text-right">Cost</th>
-                                <th class="p-3 rounded-r-xl text-center">Actions</th>
+                                <th class="p-3 rounded-l-xl">{t('customer')}</th>
+                                <th class="p-3">{t('meal')}</th>
+                                <th class="p-3">{t('details')}</th>
+                                <th class="p-3 text-right">{t('cost')}</th>
+                                <th class="p-3 rounded-r-xl text-center">{t('actions')}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-[var(--md-sys-color-outline-variant)]">
@@ -334,7 +335,7 @@ const DailyEntry = () => {
                                             </span>
                                         </td>
                                         <td class="p-3 text-[var(--md-sys-color-on-surface-variant)]">
-                                            {log.has_main_meal ? (log.is_special ? log.special_dish_name : 'Standard') : 'Extras Only'}
+                                            {log.has_main_meal ? (log.is_special ? log.special_dish_name : t('standard')) : t('extrasOnly')}
                                             {(log.extra_rice_qty > 0 || log.extra_roti_qty > 0 || log.extra_chicken_qty > 0 || log.extra_fish_qty > 0 || log.extra_egg_qty > 0 || log.extra_vegetable_qty > 0) && (
                                                 <span class="text-xs ml-2 opacity-70">
                                                     (Rice: {log.extra_rice_qty}, Roti: {log.extra_roti_qty}, Chicken: {log.extra_chicken_qty}, Fish: {log.extra_fish_qty}, Egg: {log.extra_egg_qty}, Vegetable: {log.extra_vegetable_qty})
@@ -364,7 +365,7 @@ const DailyEntry = () => {
                             {logs().length === 0 && (
                                 <tr>
                                     <td colspan={5} class="p-8 text-center text-[var(--md-sys-color-outline)]">
-                                        No entries found for this date.
+                                        {t('noEntries')}
                                     </td>
                                 </tr>
                             )}
@@ -375,7 +376,7 @@ const DailyEntry = () => {
 
             <div class={`fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-[var(--md-sys-color-tertiary-container)] text-[var(--md-sys-color-on-tertiary-container)] border border-[var(--md-sys-color-tertiary)] px-6 py-4 rounded-full shadow-2xl flex items-center gap-3 transition-all duration-300 ${successMsg() ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}>
                 <div class="bg-[var(--md-sys-color-on-tertiary-container)] rounded-full p-1"><Check size={16} class="text-[var(--md-sys-color-tertiary-container)]" /></div>
-                <span class="font-bold tracking-wide">Meal recorded successfully</span>
+                <span class="font-bold tracking-wide">{t('mealRecorded')}</span>
             </div>
 
             {/* Edit Modal */}

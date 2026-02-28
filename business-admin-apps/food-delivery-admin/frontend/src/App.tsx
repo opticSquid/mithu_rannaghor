@@ -8,32 +8,41 @@ import {
     Wallet
 } from 'lucide-solid';
 import { type ParentComponent, For } from 'solid-js';
+import { useI18n } from './i18n';
 
 const App: ParentComponent = (props) => {
     const location = useLocation();
+    const { t, setLocale, locale } = useI18n();
 
-    const navItems = [
-        { href: '/', icon: LayoutDashboard, label: 'Dashboard' },
-        { href: '/customers', icon: Users, label: 'Customers' },
-        { href: '/daily-entry', icon: PlusCircle, label: 'Daily Entry' },
-        { href: '/billing', icon: FileText, label: 'Generate Bill' },
-        { href: '/expenses', icon: Wallet, label: 'Expenses' },
-        { href: '/analytics', icon: BarChart3, label: 'Analytics' }
+    const navItems = () => [
+        { href: '/', icon: LayoutDashboard, label: t('dashboard') },
+        { href: '/customers', icon: Users, label: t('customers') },
+        { href: '/daily-entry', icon: PlusCircle, label: t('dailyEntry') },
+        { href: '/billing', icon: FileText, label: t('generateBill') },
+        { href: '/expenses', icon: Wallet, label: t('expenses') },
+        { href: '/analytics', icon: BarChart3, label: t('analytics') }
     ];
 
     return (
         <div class="flex h-screen bg-transparent flex-col md:flex-row">
             {/* Sidebar (Desktop) */}
             <aside class="w-64 glass m-4 border-none shadow-2xl hidden md:flex flex-col">
-                <div class="p-8">
+                <div class="p-8 pb-4">
                     <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-                        Admin Panel
+                        {t('adminPanel')}
                     </h1>
-                    <p class="text-xs text-text-dim mt-1">Rajitar Rannaghor</p>
+                    <p class="text-xs text-text-dim mt-1">{t('adminSubtitle')}</p>
+                </div>
+
+                <div class="px-8 pb-4">
+                    <button onClick={() => setLocale(locale() === 'en' ? 'bn' : 'en')} class="text-xs bg-white/5 border border-white/10 px-3 py-1.5 rounded-full text-text-dim hover:text-white transition-colors flex items-center gap-2">
+                        <span class="text-[10px] uppercase font-bold tracking-widest">{locale() === 'en' ? 'EN' : 'BN'}</span>
+                        {locale() === 'en' ? 'বাংলা' : 'English'}
+                    </button>
                 </div>
 
                 <nav class="flex-1 px-4 space-y-2">
-                    <For each={navItems}>
+                    <For each={navItems()}>
                         {(item) => (
                             <NavItem href={item.href} icon={item.icon} label={item.label} active={location.pathname === item.href} />
                         )}
@@ -46,8 +55,8 @@ const App: ParentComponent = (props) => {
                             A
                         </div>
                         <div>
-                            <p class="text-sm font-semibold">Admin</p>
-                            <p class="text-xs text-text-dim">Ranjitar Rannaghor</p>
+                            <p class="text-sm font-semibold">{t('adminRole')}</p>
+                            <p class="text-xs text-text-dim">{t('adminSubtitle')}</p>
                         </div>
                     </div>
                 </div>
@@ -55,12 +64,25 @@ const App: ParentComponent = (props) => {
 
             {/* Main Content */}
             <main class="flex-1 p-4 md:p-8 overflow-y-auto pb-24 md:pb-8">
+                {/* Mobile Header */}
+                <header class="md:hidden flex items-center justify-between mb-6 pb-4 border-b border-surface-border/50">
+                    <div class="flex flex-col">
+                        <h1 class="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent leading-tight">
+                            {t('adminPanel')}
+                        </h1>
+                    </div>
+                    <button onClick={() => setLocale(locale() === 'en' ? 'bn' : 'en')} class="text-xs bg-white/5 border border-white/10 px-3 py-1.5 rounded-full text-text-dim hover:text-white transition-colors flex items-center gap-2">
+                        <span class="text-[10px] uppercase font-bold tracking-widest">{locale() === 'en' ? 'EN' : 'BN'}</span>
+                        {locale() === 'en' ? 'বাংলা' : 'English'}
+                    </button>
+                </header>
+
                 {props.children}
             </main>
 
             {/* Bottom Navigation (Mobile) */}
             <nav class="md:hidden fixed bottom-0 left-0 right-0 glass border-t border-surface-border flex justify-around items-center p-2 pb-safe shadow-[0_-8px_30px_rgb(0,0,0,0.12)] z-50">
-                <For each={navItems}>
+                <For each={navItems()}>
                     {(item) => (
                         <MobileNavItem href={item.href} icon={item.icon} label={item.label} active={location.pathname === item.href} />
                     )}

@@ -1,6 +1,7 @@
 /* render from src/index.tsx */
 import { render } from 'solid-js/web';
 import { Router, Route } from '@solidjs/router';
+import { I18nProvider } from './i18n';
 import App from './App';
 import Dashboard from './pages/Dashboard';
 import DailyEntry from './pages/DailyEntry';
@@ -20,14 +21,16 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
 
 render(
     () => (
-        <Router root={App}>
-            <Route path="/" component={Dashboard} />
-            <Route path="/customers" component={Customers} />
-            <Route path="/daily-entry" component={DailyEntry} />
-            <Route path="/billing" component={Billing} />
-            <Route path="/expenses" component={Expenses} />
-            <Route path="/analytics" component={Analytics} />
-        </Router>
+        <I18nProvider>
+            <Router root={App}>
+                <Route path="/" component={Dashboard} />
+                <Route path="/customers" component={Customers} />
+                <Route path="/daily-entry" component={DailyEntry} />
+                <Route path="/billing" component={Billing} />
+                <Route path="/expenses" component={Expenses} />
+                <Route path="/analytics" component={Analytics} />
+            </Router>
+        </I18nProvider>
     ),
     root!,
 );
