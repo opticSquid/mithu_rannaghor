@@ -114,7 +114,7 @@ const Analytics = () => {
             </header>
 
             <Show when={!loading()} fallback={<div class="flex items-center justify-center h-64"><div class="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div></div>}>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <SummaryCard
                         label="30d Revenue"
                         value={`₹${stats()?.total_revenue.toLocaleString('en-IN')}`}

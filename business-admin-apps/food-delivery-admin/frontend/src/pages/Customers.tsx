@@ -50,7 +50,7 @@ const Customers = () => {
                 />
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <For each={filteredUsers()}>
                     {(user) => (
                         <div class="glass p-6 card border-white/5 hover:border-primary/50 group">
