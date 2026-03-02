@@ -24,7 +24,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 # Copy backend source
-COPY *.go ./
+COPY . .
 
 # Build static binary
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o food-delivery-admin .

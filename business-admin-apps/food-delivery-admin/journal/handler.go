@@ -59,10 +59,14 @@ func CreateDailyEntry(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	yyyy, MM, dd := log.LogDate.Date()
+	utc_time := time.Now().UTC()
+	crt_dt := strconv.Itoa(yyyy) + "-" + strconv.Itoa(int(MM)) + "-" + strconv.Itoa(dd) + " " + strconv.Itoa(utc_time.Hour()) + ":" + strconv.Itoa(utc_time.Minute()) + ":" + strconv.Itoa(utc_time.Second()) + "." + strconv.Itoa(utc_time.Nanosecond()) + "+" + "00"
+
 	_, err = tx.Exec(r.Context(), `
-		INSERT INTO WALLET_TRANSACTIONS (USER_ID, TXN_TYPE, STATUS, AMOUNT, BALANCE_AFTER) 
-		VALUES ($1, 'delivery', 'confirmed', $2, $3)
-	`, log.UserID, totalCost, newBalance)
+		INSERT INTO WALLET_TRANSACTIONS (USER_ID, TXN_TYPE, STATUS, AMOUNT, BALANCE_AFTER, CREATED_AT) 
+		VALUES ($1, 'delivery', 'confirmed', $2, $3, $4)
+	`, log.UserID, totalCost, newBalance, crt_dt)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
