@@ -258,8 +258,8 @@ const RechargeForm = (props: { user: User; onSuccess: () => void }) => {
                 <label class="block text-sm font-medium text-text-dim mb-1">{t('paymentRef')}</label>
                 <input
                     class="input"
-                    required
                     placeholder={t('optional')}
+                    value={refId()}
                     onInput={e => setRefId(e.currentTarget.value)}
                 />
             </div>
