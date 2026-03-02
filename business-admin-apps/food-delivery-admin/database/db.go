@@ -1,4 +1,4 @@
-package main
+package database
 
 import (
 	"context"
@@ -11,7 +11,11 @@ import (
 
 var dbPool *pgxpool.Pool
 
-func initDB() {
+func GetDbConn() *pgxpool.Pool {
+	return dbPool
+}
+
+func InitDB() *pgxpool.Pool {
 	user := os.Getenv("POSTGRES_USER")
 	if user == "" {
 		user = "postgres" // fallback for local dev if not set
@@ -92,4 +96,5 @@ func initDB() {
 	}
 
 	log.Println("Connected to database successfully")
+	return dbPool
 }

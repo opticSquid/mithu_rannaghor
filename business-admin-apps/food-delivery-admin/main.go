@@ -11,11 +11,19 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/joho/godotenv"
 	"github.com/rs/cors"
+	"github.com/soumalya/food-delivery-admin/billing"
+	"github.com/soumalya/food-delivery-admin/database"
+	"github.com/soumalya/food-delivery-admin/expenses"
+	"github.com/soumalya/food-delivery-admin/journal"
+	"github.com/soumalya/food-delivery-admin/meals"
+	"github.com/soumalya/food-delivery-admin/stats"
+	"github.com/soumalya/food-delivery-admin/users"
+	"github.com/soumalya/food-delivery-admin/wallet"
 )
 
 func main() {
 	_ = godotenv.Load()
-	initDB()
+	dbPool := database.InitDB()
 	defer dbPool.Close()
 
 	r := chi.NewRouter()
@@ -24,25 +32,24 @@ func main() {
 	r.Use(cors.AllowAll().Handler)
 
 	r.Route("/api", func(r chi.Router) {
-		r.Get("/users", getUsers)
-		r.Post("/users", createUser)
-		r.Post("/wallet/recharge", rechargeWallet)
-		r.Get("/daily-entry", getDailyEntries)
-		r.Post("/daily-entry", createDailyEntry)
-		r.Put("/daily-entry/{id}", updateDailyEntry)
-		r.Delete("/daily-entry/{id}", deleteDailyEntry)
-		r.Get("/reports/bill", getBill)
-
-		r.Get("/expenses", getExpenses)
-		r.Post("/expenses", createExpense)
-		r.Put("/expenses/{id}", updateExpense)
-		r.Delete("/expenses/{id}", deleteExpense)
-		r.Get("/dashboard/stats", getDashboardStats)
-		r.Get("/analytics", getAnalyticsStats)
-		r.Post("/meals", createMeal)
-		r.Get("/meals", getMeals)
-		r.Put("/meals/{id}", updateMeal)
-		r.Delete("/meals/{id}", deleteMeal)
+		r.Get("/users", users.GetUsers)
+		r.Post("/users", users.CreateUser)
+		r.Post("/wallet/recharge", wallet.RechargeWallet)
+		r.Get("/daily-entry", journal.GetDailyEntries)
+		r.Post("/daily-entry", journal.CreateDailyEntry)
+		r.Put("/daily-entry/{id}", journal.UpdateDailyEntry)
+		r.Delete("/daily-entry/{id}", journal.DeleteDailyEntry)
+		r.Get("/reports/bill", billing.GetBill)
+		r.Get("/expenses", expenses.GetExpenses)
+		r.Post("/expenses", expenses.CreateExpense)
+		r.Put("/expenses/{id}", expenses.UpdateExpense)
+		r.Delete("/expenses/{id}", expenses.DeleteExpense)
+		r.Get("/dashboard/stats", stats.GetDashboardStats)
+		r.Get("/analytics", stats.GetAnalyticsStats)
+		r.Post("/meals", meals.CreateMeal)
+		r.Get("/meals", meals.GetMeals)
+		r.Put("/meals/{id}", meals.UpdateMeal)
+		r.Delete("/meals/{id}", meals.DeleteMeal)
 	})
 
 	// Serve static files
