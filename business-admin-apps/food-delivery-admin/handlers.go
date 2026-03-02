@@ -736,7 +736,26 @@ func getMealPricesInternal() map[string]float64 {
 	return prices
 }
 
-func getMealPrices(w http.ResponseWriter, r *http.Request) {
+func createMeal(w http.ResponseWriter, r *http.Request) {
+	var m MealPrice
+	if err := json.NewDecoder(r.Body).Decode(&m); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	err := dbPool.QueryRow(context.Background(), `
+		INSERT INTO MEAL_PRICES (ITEM_NAME, ITEM_PRICE) 
+		VALUES ($1, $2) 
+		RETURNING ITEM_ID
+	`, m.ItemName, m.Price).Scan(&m.ItemID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(m)
+}
+
+func getMeals(w http.ResponseWriter, r *http.Request) {
 	rows, err := dbPool.Query(context.Background(), "SELECT ITEM_ID, ITEM_NAME, PRICE, UPDATED_AT FROM MEAL_PRICES ORDER BY PRICE DESC")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -758,7 +777,7 @@ func getMealPrices(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(prices)
 }
 
-func updateMealPrice(w http.ResponseWriter, r *http.Request) {
+func updateMeal(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 
 	var p MealPrice
@@ -771,6 +790,26 @@ func updateMealPrice(w http.ResponseWriter, r *http.Request) {
 		UPDATE MEAL_PRICES SET PRICE = $1, UPDATED_AT = CURRENT_TIMESTAMP
 		WHERE ITEM_ID = $2
 	`, p.Price, id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func deleteMeal(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+
+	var p MealPrice
+	if err := json.NewDecoder(r.Body).Decode(&p); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	_, err := dbPool.Exec(context.Background(), `
+		DELETE FROM MEAL_PRICES
+		WHERE ITEM_ID = $1
+	`, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

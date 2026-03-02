@@ -39,8 +39,10 @@ func main() {
 		r.Delete("/expenses/{id}", deleteExpense)
 		r.Get("/dashboard/stats", getDashboardStats)
 		r.Get("/analytics", getAnalyticsStats)
-		r.Get("/meal-prices", getMealPrices)
-		r.Put("/meal-prices/{id}", updateMealPrice)
+		r.Post("/meals", createMeal)
+		r.Get("/meals", getMeals)
+		r.Put("/meals/{id}", updateMeal)
+		r.Delete("/meals/{id}", deleteMeal)
 	})
 
 	// Serve static files

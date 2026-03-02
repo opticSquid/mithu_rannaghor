@@ -59,7 +59,7 @@ func initDB() {
         );
 		CREATE TABLE IF NOT EXISTS MEAL_PRICES (
             ITEM_ID VARCHAR(50) PRIMARY KEY,
-            ITEM_NAME VARCHAR(100) NOT NULL,
+            ITEM_NAME VARCHAR(100)  UNIQUE NOT NULL,
             PRICE DECIMAL(10,2) NOT NULL,
             UPDATED_AT TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
@@ -81,7 +81,7 @@ func initDB() {
 			('chicken', 'Extra Chicken', 30.0),
 			('fish', 'Extra Fish', 20.0),
 			('egg', 'Extra Egg', 10.0),
-			('vegetable', 'Extra Vegetable', 15.0)
+			('vegetable', 'Extra Vegetable', 15.0);
 		`)
 		if err != nil {
 			log.Printf("Unable to insert default meal prices: %v\n", err)
