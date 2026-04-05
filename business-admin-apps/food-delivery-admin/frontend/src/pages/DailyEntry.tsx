@@ -4,11 +4,62 @@ import { For, createEffect, createSignal, onMount } from 'solid-js';
 import { DailyLog, User } from '../types';
 import { useI18n } from '../i18n';
 
+class TrieNode {
+    children = new Map<string, TrieNode>();
+    users: User[] = [];
+}
+
+class UserTrie {
+    root = new TrieNode();
+
+    insert(user: User) {
+        let node = this.root;
+        const word = user.name.toLowerCase();
+        for (const char of word) {
+            if (!node.children.has(char)) {
+                node.children.set(char, new TrieNode());
+            }
+            node = node.children.get(char)!;
+        }
+        node.users.push(user);
+    }
+
+    search(prefix: string, maxResults: number = 5): User[] {
+        let node = this.root;
+        const p = prefix.toLowerCase();
+        for (const char of p) {
+            if (!node.children.has(char)) return [];
+            node = node.children.get(char)!;
+        }
+        
+        const results: User[] = [];
+        const collect = (curr: TrieNode) => {
+            if (results.length >= maxResults) return;
+            for (const user of curr.users) {
+                if (results.length < maxResults) results.push(user);
+            }
+            if (results.length >= maxResults) return;
+            
+            for (const child of curr.children.values()) {
+                collect(child);
+                if (results.length >= maxResults) return;
+            }
+        };
+        
+        collect(node);
+        return results;
+    }
+}
+
 const DailyEntry = () => {
     const { t } = useI18n();
     const [users, setUsers] = createSignal<User[]>([]);
     const [logs, setLogs] = createSignal<DailyLog[]>([]);
     const [selectedUser, setSelectedUser] = createSignal<string>('');
+    const [userTrie, setUserTrie] = createSignal<UserTrie>(new UserTrie());
+    const [searchQuery, setSearchQuery] = createSignal('');
+    const [suggestions, setSuggestions] = createSignal<User[]>([]);
+    const [showSuggestions, setShowSuggestions] = createSignal(false);
     const [date, setDate] = createSignal(new Date().toISOString().split('T')[0]);
     const [mealType, setMealType] = createSignal<'lunch' | 'dinner'>('lunch');
     const [mealCategory, setMealCategory] = createSignal<'standard' | 'special' | 'none'>('standard');
@@ -26,10 +77,44 @@ const DailyEntry = () => {
     const fetchUsers = async () => {
         try {
             const res = await axios.get('/api/users');
-            setUsers(res.data || []);
+            const data = res.data || [];
+            
+            const newTrie = new UserTrie();
+            data.forEach((u: User) => newTrie.insert(u));
+            setUserTrie(newTrie);
+            
+            setUsers(data);
         } catch (error) {
             console.error('Failed to fetch users:', error);
         }
+    };
+
+    const handleSearchInput = (e: any) => {
+        const val = e.currentTarget.value;
+        setSearchQuery(val);
+        
+        if (selectedUser()) {
+            setSelectedUser(''); 
+        }
+        
+        if (val.trim().length >= 3) {
+            const results = userTrie().search(val.trim(), 5);
+            setSuggestions(results);
+            setShowSuggestions(true);
+        } else {
+            setSuggestions([]);
+            setShowSuggestions(false);
+        }
+    };
+
+    const handleSelectUser = (u: User) => {
+        setSelectedUser(u.user_id.toString());
+        setSearchQuery(u.name);
+        setShowSuggestions(false);
+    };
+
+    const handleSearchBlur = () => {
+        setTimeout(() => setShowSuggestions(false), 200);
     };
 
     onMount(fetchUsers);
@@ -155,23 +240,40 @@ const DailyEntry = () => {
                 <div>
                     <label class="text-xs font-bold text-[var(--md-sys-color-primary)] ml-4 mb-1 block tracking-wider uppercase">{t('customer')}</label>
                     <div class="relative">
-                        <select
-                            class="input-filled appearance-none cursor-pointer"
-                            required
-                            value={selectedUser()}
-                            onInput={e => setSelectedUser(e.currentTarget.value)}
-                        >
-                            <option value="">{t('selectCustomer')}</option>
-                            <For each={users()}>
-                                {(user) => (
-                                    <option value={user.user_id}>
-                                        {user.name} • {user.role === 'admin' ? 'Admin' : 'User'} • ₹{user.balance.toFixed(0)}
-                                    </option>
+                        <input
+                            type="text"
+                            class="input-filled w-full"
+                            placeholder={t('selectCustomer') || "Search Customer..."}
+                            value={searchQuery()}
+                            onInput={handleSearchInput}
+                            onFocus={() => { if (searchQuery().trim().length >= 3) setShowSuggestions(true); }}
+                            onBlur={handleSearchBlur}
+                            required={!selectedUser()}
+                        />
+                        {showSuggestions() && (
+                            <ul class="absolute z-50 top-[calc(100%+4px)] left-0 right-0 bg-[var(--md-sys-color-surface-container)] rounded-2xl shadow-xl border border-[var(--md-sys-color-outline-variant)] overflow-hidden">
+                                <For each={suggestions()}>
+                                    {(user) => (
+                                        <li 
+                                            class="px-5 py-3 cursor-pointer hover:bg-[var(--md-sys-color-surface-container-high)] border-b border-[var(--md-sys-color-outline-variant)] last:border-0 flex justify-between items-center transition-colors"
+                                            onClick={() => handleSelectUser(user)}
+                                        >
+                                            <span class="font-bold text-[var(--md-sys-color-on-surface)]">{user.name}</span>
+                                            <span class="text-xs font-bold text-[var(--md-sys-color-on-surface-variant)] bg-[var(--md-sys-color-surface-container-highest)] px-2.5 py-1 rounded-lg tracking-wide">
+                                                {user.role === 'admin' ? 'Admin' : 'User'} • ₹{user.balance.toFixed(0)}
+                                            </span>
+                                        </li>
+                                    )}
+                                </For>
+                                {suggestions().length === 0 && (
+                                    <li class="px-5 py-6 text-sm text-[var(--md-sys-color-on-surface-variant)] text-center font-medium">
+                                        No matching customers found
+                                    </li>
                                 )}
-                            </For>
-                        </select>
+                            </ul>
+                        )}
                         <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--md-sys-color-on-surface-variant)]">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                         </div>
                     </div>
                 </div>
