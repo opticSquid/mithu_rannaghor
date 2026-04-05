@@ -53,6 +53,7 @@ class UserTrie {
 
 const DailyEntry = () => {
     const { t } = useI18n();
+    const [prices, setPrices] = createSignal<Record<string, number>>({});
     const [users, setUsers] = createSignal<User[]>([]);
     const [logs, setLogs] = createSignal<DailyLog[]>([]);
     const [selectedUser, setSelectedUser] = createSignal<string>('');
@@ -117,7 +118,23 @@ const DailyEntry = () => {
         setTimeout(() => setShowSuggestions(false), 200);
     };
 
-    onMount(fetchUsers);
+    const fetchPrices = async () => {
+        try {
+            const res = await axios.get('/api/meals');
+            const priceMap: Record<string, number> = {};
+            res.data?.forEach((item: any) => {
+                priceMap[item.item_id] = item.price;
+            });
+            setPrices(priceMap);
+        } catch (error) {
+            console.error('Failed to fetch prices:', error);
+        }
+    };
+
+    onMount(() => {
+        fetchUsers();
+        fetchPrices();
+    });
 
     const fetchLogs = async () => {
         try {
@@ -290,7 +307,7 @@ const DailyEntry = () => {
                             <input type="radio" name="cat" class="hidden" checked={mealCategory() === 'standard'} onChange={() => setMealCategory('standard')} />
                             <Utensils size={24} class="mb-2" />
                             <span class="text-sm font-bold">{t('standard')}</span>
-                            <span class="text-[10px] opacity-80 mt-1">₹52.5</span>
+                            <span class="text-[10px] opacity-80 mt-1">₹{prices()['standard'] ?? 52.5}</span>
                         </label>
 
                         {/* Special */}
@@ -301,7 +318,7 @@ const DailyEntry = () => {
                             <input type="radio" name="cat" class="hidden" checked={mealCategory() === 'special'} onChange={() => setMealCategory('special')} />
                             <ChefHat size={24} class="mb-2" />
                             <span class="text-sm font-bold">Special</span>
-                            <span class="text-[10px] opacity-80 mt-1">₹120.0</span>
+                            <span class="text-[10px] opacity-80 mt-1">₹{prices()['special'] ?? 120}</span>
                         </label>
 
                         {/* None */}
@@ -337,7 +354,7 @@ const DailyEntry = () => {
                     <div class="grid grid-cols-2 gap-4">
                         {/* Rice */}
                         <div class="bg-[var(--md-sys-color-surface-container-high)] p-4 rounded-2xl flex flex-col items-center">
-                            <span class="text-xs font-medium text-[var(--md-sys-color-on-surface-variant)] mb-2">{t('rice')} (₹10)</span>
+                            <span class="text-xs font-medium text-[var(--md-sys-color-on-surface-variant)] mb-2">{t('rice')} (₹{prices()['rice'] ?? 10})</span>
                             <div class="flex items-center gap-4">
                                 <button type="button" onClick={() => setExtraRice(Math.max(0, extraRice() - 1))} class="w-10 h-10 rounded-full bg-[var(--md-sys-color-surface-container-highest)] hover:bg-[var(--md-sys-color-primary-container)] hover:text-[var(--md-sys-color-on-primary-container)] transition-colors flex items-center justify-center font-bold text-xl">-</button>
                                 <span class="text-xl font-bold w-6 text-center">{extraRice()}</span>
@@ -346,7 +363,7 @@ const DailyEntry = () => {
                         </div>
                         {/* Roti */}
                         <div class="bg-[var(--md-sys-color-surface-container-high)] p-4 rounded-2xl flex flex-col items-center">
-                            <span class="text-xs font-medium text-[var(--md-sys-color-on-surface-variant)] mb-2">{t('roti')} (₹4)</span>
+                            <span class="text-xs font-medium text-[var(--md-sys-color-on-surface-variant)] mb-2">{t('roti')} (₹{prices()['roti'] ?? 4})</span>
                             <div class="flex items-center gap-4">
                                 <button type="button" onClick={() => setExtraRoti(Math.max(0, extraRoti() - 1))} class="w-10 h-10 rounded-full bg-[var(--md-sys-color-surface-container-highest)] hover:bg-[var(--md-sys-color-primary-container)] hover:text-[var(--md-sys-color-on-primary-container)] transition-colors flex items-center justify-center font-bold text-xl">-</button>
                                 <span class="text-xl font-bold w-6 text-center">{extraRoti()}</span>
@@ -355,7 +372,7 @@ const DailyEntry = () => {
                         </div>
                         {/* Chicken */}
                         <div class="bg-[var(--md-sys-color-surface-container-high)] p-4 rounded-2xl flex flex-col items-center">
-                            <span class="text-xs font-medium text-[var(--md-sys-color-on-surface-variant)] mb-2">{t('chicken')} (₹30)</span>
+                            <span class="text-xs font-medium text-[var(--md-sys-color-on-surface-variant)] mb-2">{t('chicken')} (₹{prices()['chicken'] ?? 30})</span>
                             <div class="flex items-center gap-4">
                                 <button type="button" onClick={() => setExtraChicken(Math.max(0, extraChicken() - 1))} class="w-10 h-10 rounded-full bg-[var(--md-sys-color-surface-container-highest)] hover:bg-[var(--md-sys-color-primary-container)] hover:text-[var(--md-sys-color-on-primary-container)] transition-colors flex items-center justify-center font-bold text-xl">-</button>
                                 <span class="text-xl font-bold w-6 text-center">{extraChicken()}</span>
@@ -364,7 +381,7 @@ const DailyEntry = () => {
                         </div>
                         {/* Fish */}
                         <div class="bg-[var(--md-sys-color-surface-container-high)] p-4 rounded-2xl flex flex-col items-center">
-                            <span class="text-xs font-medium text-[var(--md-sys-color-on-surface-variant)] mb-2">{t('fish')} (₹20)</span>
+                            <span class="text-xs font-medium text-[var(--md-sys-color-on-surface-variant)] mb-2">{t('fish')} (₹{prices()['fish'] ?? 20})</span>
                             <div class="flex items-center gap-4">
                                 <button type="button" onClick={() => setExtraFish(Math.max(0, extraFish() - 1))} class="w-10 h-10 rounded-full bg-[var(--md-sys-color-surface-container-highest)] hover:bg-[var(--md-sys-color-primary-container)] hover:text-[var(--md-sys-color-on-primary-container)] transition-colors flex items-center justify-center font-bold text-xl">-</button>
                                 <span class="text-xl font-bold w-6 text-center">{extraFish()}</span>
@@ -373,7 +390,7 @@ const DailyEntry = () => {
                         </div>
                         {/* Egg */}
                         <div class="bg-[var(--md-sys-color-surface-container-high)] p-4 rounded-2xl flex flex-col items-center">
-                            <span class="text-xs font-medium text-[var(--md-sys-color-on-surface-variant)] mb-2">{t('egg')} (₹10)</span>
+                            <span class="text-xs font-medium text-[var(--md-sys-color-on-surface-variant)] mb-2">{t('egg')} (₹{prices()['egg'] ?? 10})</span>
                             <div class="flex items-center gap-4">
                                 <button type="button" onClick={() => setExtraEgg(Math.max(0, extraEgg() - 1))} class="w-10 h-10 rounded-full bg-[var(--md-sys-color-surface-container-highest)] hover:bg-[var(--md-sys-color-primary-container)] hover:text-[var(--md-sys-color-on-primary-container)] transition-colors flex items-center justify-center font-bold text-xl">-</button>
                                 <span class="text-xl font-bold w-6 text-center">{extraEgg()}</span>
@@ -382,7 +399,7 @@ const DailyEntry = () => {
                         </div>
                         {/* Vegetable */}
                         <div class="bg-[var(--md-sys-color-surface-container-high)] p-4 rounded-2xl flex flex-col items-center">
-                            <span class="text-xs font-medium text-[var(--md-sys-color-on-surface-variant)] mb-2">{t('vegetable')} (₹15)</span>
+                            <span class="text-xs font-medium text-[var(--md-sys-color-on-surface-variant)] mb-2">{t('vegetable')} (₹{prices()['vegetable'] ?? 15})</span>
                             <div class="flex items-center gap-4">
                                 <button type="button" onClick={() => setExtraVegetable(Math.max(0, extraVegetable() - 1))} class="w-10 h-10 rounded-full bg-[var(--md-sys-color-surface-container-highest)] hover:bg-[var(--md-sys-color-primary-container)] hover:text-[var(--md-sys-color-on-primary-container)] transition-colors flex items-center justify-center font-bold text-xl">-</button>
                                 <span class="text-xl font-bold w-6 text-center">{extraVegetable()}</span>
