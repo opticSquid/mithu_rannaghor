@@ -49,19 +49,25 @@ func CreateDailyEntry(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Update Wallet & Create Transaction
-	var newBalance float64
-	err = tx.QueryRow(r.Context(), `
-		UPDATE WALLET SET BALANCE = BALANCE - $1 WHERE USER_ID = $2 RETURNING BALANCE
-	`, totalCost, log.UserID).Scan(&newBalance)
-	if err != nil {
+	// Fetch previous wallet balance
+	// creating CREATED_AT value
+	yyyy, MM, dd := log.LogDate.Date()
+	utc_time := time.Now().UTC()
+	crt_dt := strconv.Itoa(yyyy) + "-" + strconv.Itoa(int(MM)) + "-" + strconv.Itoa(dd) + " " + strconv.Itoa(utc_time.Hour()) + ":" + strconv.Itoa(utc_time.Minute()) + ":" + strconv.Itoa(utc_time.Second()) + "." + strconv.Itoa(utc_time.Nanosecond()) + "+" + "00"
+
+	var prevBalanceAfter *float64
+	err = tx.QueryRow(r.Context(), `SELECT BALANCE_AFTER FROM WALLET_TRANSACTIONS WHERE USER_ID = $1 AND CREATED_AT < $2 ORDER BY CREATED_AT DESC LIMIT 1`, log.UserID, crt_dt).Scan(&prevBalanceAfter)
+
+	if err != nil && err.Error() != "no rows in result set" {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	yyyy, MM, dd := log.LogDate.Date()
-	utc_time := time.Now().UTC()
-	crt_dt := strconv.Itoa(yyyy) + "-" + strconv.Itoa(int(MM)) + "-" + strconv.Itoa(dd) + " " + strconv.Itoa(utc_time.Hour()) + ":" + strconv.Itoa(utc_time.Minute()) + ":" + strconv.Itoa(utc_time.Second()) + "." + strconv.Itoa(utc_time.Nanosecond()) + "+" + "00"
+	var currentBalance float64 = 0
+	if prevBalanceAfter != nil {
+		currentBalance = *prevBalanceAfter
+	}
+	newBalance := currentBalance - totalCost
 
 	_, err = tx.Exec(r.Context(), `
 		INSERT INTO WALLET_TRANSACTIONS (USER_ID, TXN_TYPE, STATUS, AMOUNT, BALANCE_AFTER, CREATED_AT) 
@@ -102,16 +108,6 @@ func DeleteDailyEntry(w http.ResponseWriter, r *http.Request) {
 
 	// Delete
 	_, err = tx.Exec(r.Context(), `DELETE FROM DAILY_LOGS WHERE LOG_ID = $1`, logID)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// Refund Wallet
-	var newBalance float64
-	err = tx.QueryRow(r.Context(), `
-		UPDATE WALLET SET BALANCE = BALANCE + $1 WHERE USER_ID = $2 RETURNING BALANCE
-	`, totalCost, userID).Scan(&newBalance)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
