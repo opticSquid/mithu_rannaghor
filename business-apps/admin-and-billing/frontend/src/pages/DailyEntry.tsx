@@ -4,60 +4,13 @@ import { For, createEffect, createSignal, onMount } from 'solid-js';
 import { DailyLog, User } from '../types';
 import { useI18n } from '../i18n';
 
-class TrieNode {
-    children = new Map<string, TrieNode>();
-    users: User[] = [];
-}
-
-class UserTrie {
-    root = new TrieNode();
-
-    insert(user: User) {
-        let node = this.root;
-        const word = user.name.toLowerCase();
-        for (const char of word) {
-            if (!node.children.has(char)) {
-                node.children.set(char, new TrieNode());
-            }
-            node = node.children.get(char)!;
-        }
-        node.users.push(user);
-    }
-
-    search(prefix: string, maxResults: number = 5): User[] {
-        let node = this.root;
-        const p = prefix.toLowerCase();
-        for (const char of p) {
-            if (!node.children.has(char)) return [];
-            node = node.children.get(char)!;
-        }
-        
-        const results: User[] = [];
-        const collect = (curr: TrieNode) => {
-            if (results.length >= maxResults) return;
-            for (const user of curr.users) {
-                if (results.length < maxResults) results.push(user);
-            }
-            if (results.length >= maxResults) return;
-            
-            for (const child of curr.children.values()) {
-                collect(child);
-                if (results.length >= maxResults) return;
-            }
-        };
-        
-        collect(node);
-        return results;
-    }
-}
+import { globalUsers, globalUserTrie, loadUsers, updateUserBalance } from '../store/userStore';
 
 const DailyEntry = () => {
     const { t } = useI18n();
     const [prices, setPrices] = createSignal<Record<string, number>>({});
-    const [users, setUsers] = createSignal<User[]>([]);
     const [logs, setLogs] = createSignal<DailyLog[]>([]);
     const [selectedUser, setSelectedUser] = createSignal<string>('');
-    const [userTrie, setUserTrie] = createSignal<UserTrie>(new UserTrie());
     const [searchQuery, setSearchQuery] = createSignal('');
     const [suggestions, setSuggestions] = createSignal<User[]>([]);
     const [showSuggestions, setShowSuggestions] = createSignal(false);
@@ -75,20 +28,7 @@ const DailyEntry = () => {
     const [successMsg, setSuccessMsg] = createSignal(false);
     const [editingLog, setEditingLog] = createSignal<DailyLog | null>(null);
 
-    const fetchUsers = async () => {
-        try {
-            const res = await axios.get('/api/users');
-            const data = res.data || [];
-            
-            const newTrie = new UserTrie();
-            data.forEach((u: User) => newTrie.insert(u));
-            setUserTrie(newTrie);
-            
-            setUsers(data);
-        } catch (error) {
-            console.error('Failed to fetch users:', error);
-        }
-    };
+
 
     const handleSearchInput = (e: any) => {
         const val = e.currentTarget.value;
@@ -99,7 +39,7 @@ const DailyEntry = () => {
         }
         
         if (val.trim().length >= 3) {
-            const results = userTrie().search(val.trim(), 5);
+            const results = globalUserTrie().search(val.trim(), 5);
             setSuggestions(results);
             setShowSuggestions(true);
         } else {
@@ -132,7 +72,7 @@ const DailyEntry = () => {
     };
 
     onMount(() => {
-        fetchUsers();
+        loadUsers();
         fetchPrices();
     });
 
@@ -155,14 +95,16 @@ const DailyEntry = () => {
     });
 
     const handleDelete = async (logId: number) => {
+        const logToDelete = logs().find(l => l.log_id === logId);
+        if (!logToDelete) return;
         if (!confirm('Are you sure you want to delete this entry? This will refund the cost to the user\'s wallet.')) return;
 
         try {
-            await axios.delete(`/api/daily-entry/${logId}`);
+            const res = await axios.delete(`/api/daily-entry/${logId}`);
             setSuccessMsg(true); // Reuse success msg or create a new one
             setTimeout(() => setSuccessMsg(false), 3000);
             await fetchLogs();
-            await fetchUsers(); // Update wallet balance
+            updateUserBalance(logToDelete.user_id, res.data.new_balance); // Update wallet balance
         } catch (error) {
             console.error('Failed to delete log:', error);
             alert('Failed to delete entry');
@@ -175,7 +117,7 @@ const DailyEntry = () => {
 
         setIsSubmitting(true);
         try {
-            await axios.post('/api/daily-entry', {
+            const res = await axios.post('/api/daily-entry', {
                 user_id: parseInt(selectedUser()),
                 log_date: new Date(date()).toISOString(),
                 meal_type: mealType(),
@@ -191,7 +133,7 @@ const DailyEntry = () => {
             });
             setSuccessMsg(true);
             setTimeout(() => setSuccessMsg(false), 3000);
-            await fetchUsers();
+            updateUserBalance(parseInt(selectedUser()), res.data.new_balance);
             await fetchLogs();
 
             // Reset some fields
@@ -447,7 +389,7 @@ const DailyEntry = () => {
                             <For each={logs()}>
                                 {(log) => (
                                     <tr class="hover:bg-[var(--md-sys-color-surface-container-high)] transition-colors">
-                                        <td class="p-3 font-medium">{log.user_name || users().find(u => u.user_id === log.user_id)?.name || log.user_id}</td>
+                                        <td class="p-3 font-medium">{log.user_name || globalUsers().find(u => u.user_id === log.user_id)?.name || log.user_id}</td>
                                         <td class="p-3 capitalize">
                                             <span class={`px-2 py-1 rounded-md text-xs font-bold ${log.meal_type === 'lunch' ? 'bg-amber-100 text-amber-800' : 'bg-indigo-100 text-indigo-800'}`}>
                                                 {log.meal_type}
@@ -503,10 +445,10 @@ const DailyEntry = () => {
                 <EditLogModal
                     log={editingLog()!}
                     onClose={() => setEditingLog(null)}
-                    onSuccess={async () => {
+                    onSuccess={async (newBalance: number) => {
                         setEditingLog(null);
                         await fetchLogs();
-                        await fetchUsers();
+                        updateUserBalance(editingLog()!.user_id, newBalance);
                         setSuccessMsg(true);
                         setTimeout(() => setSuccessMsg(false), 3000);
                     }}
@@ -516,7 +458,7 @@ const DailyEntry = () => {
     );
 };
 
-const EditLogModal = (props: { log: DailyLog; onClose: () => void; onSuccess: () => void }) => {
+const EditLogModal = (props: { log: DailyLog; onClose: () => void; onSuccess: (newBalance: number) => void }) => {
     const [mealType, setMealType] = createSignal(props.log.meal_type);
     const [extraRice, setExtraRice] = createSignal(props.log.extra_rice_qty);
     const [extraRoti, setExtraRoti] = createSignal(props.log.extra_roti_qty);
@@ -531,7 +473,7 @@ const EditLogModal = (props: { log: DailyLog; onClose: () => void; onSuccess: ()
         e.preventDefault();
         setIsSubmitting(true);
         try {
-            await axios.put(`/api/daily-entry/${props.log.log_id}`, {
+            const res = await axios.put(`/api/daily-entry/${props.log.log_id}`, {
                 meal_type: mealType(),
                 extra_rice_qty: extraRice(),
                 extra_roti_qty: extraRoti(),
@@ -539,7 +481,7 @@ const EditLogModal = (props: { log: DailyLog; onClose: () => void; onSuccess: ()
                 is_special: props.log.is_special
                 // Pass other fields as is or undefined if backend handles partial updates
             });
-            props.onSuccess();
+            props.onSuccess(res.data.new_balance);
         } catch (err) {
             alert('Failed to update entry');
         } finally {

@@ -6,19 +6,49 @@ import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import { useI18n } from '../i18n';
 
+import { globalUserTrie, loadUsers } from '../store/userStore';
+
 const Billing = () => {
     const { t } = useI18n();
-    const [users, setUsers] = createSignal<User[]>([]);
     const [selectedUser, setSelectedUser] = createSignal<string>('');
     const [startDate, setStartDate] = createSignal(new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0]);
     const [endDate, setEndDate] = createSignal(new Date().toISOString().split('T')[0]);
     const [report, setReport] = createSignal<BillReport | null>(null);
     const [isLoading, setIsLoading] = createSignal(false);
+    
+    const [searchQuery, setSearchQuery] = createSignal('');
+    const [suggestions, setSuggestions] = createSignal<User[]>([]);
+    const [showSuggestions, setShowSuggestions] = createSignal(false);
 
-    onMount(async () => {
-        const res = await axios.get('/api/users');
-        setUsers(res.data || []);
-    });
+    onMount(loadUsers);
+
+    const handleSearchInput = (e: any) => {
+        const val = e.currentTarget.value;
+        setSearchQuery(val);
+        
+        if (selectedUser()) {
+            setSelectedUser(''); 
+        }
+        
+        if (val.trim().length >= 3) {
+            const results = globalUserTrie().search(val.trim(), 5);
+            setSuggestions(results);
+            setShowSuggestions(true);
+        } else {
+            setSuggestions([]);
+            setShowSuggestions(false);
+        }
+    };
+
+    const handleSelectUser = (u: User) => {
+        setSelectedUser(u.user_id.toString());
+        setSearchQuery(u.name);
+        setShowSuggestions(false);
+    };
+
+    const handleSearchBlur = () => {
+        setTimeout(() => setShowSuggestions(false), 200);
+    };
 
     const generateReport = async () => {
         if (!selectedUser()) return;
@@ -104,16 +134,42 @@ const Billing = () => {
             <div class="glass p-6 grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                 <div class="md:col-span-1">
                     <label class="block text-xs font-bold uppercase tracking-widest text-text-dim mb-2">{t('customer')}</label>
-                    <select
-                        class="input bg-surface"
-                        value={selectedUser()}
-                        onInput={e => setSelectedUser(e.currentTarget.value)}
-                    >
-                        <option value="">{t('selectCustomer')}</option>
-                        <For each={users()}>
-                            {(user) => <option value={user.user_id}>{user.name}</option>}
-                        </For>
-                    </select>
+                    <div class="relative">
+                        <input
+                            type="text"
+                            class="input bg-surface w-full"
+                            placeholder={t('selectCustomer') || "Search Customer..."}
+                            value={searchQuery()}
+                            onInput={handleSearchInput}
+                            onFocus={() => { if (searchQuery().trim().length >= 3) setShowSuggestions(true); }}
+                            onBlur={handleSearchBlur}
+                        />
+                        {showSuggestions() && (
+                            <ul class="absolute z-50 top-[calc(100%+4px)] left-0 right-0 bg-[var(--md-sys-color-surface-container)] rounded-2xl shadow-xl border border-[var(--md-sys-color-outline-variant)] overflow-hidden">
+                                <For each={suggestions()}>
+                                    {(user) => (
+                                        <li 
+                                            class="px-5 py-3 cursor-pointer hover:bg-[var(--md-sys-color-surface-container-high)] border-b border-[var(--md-sys-color-outline-variant)] last:border-0 flex justify-between items-center transition-colors"
+                                            onClick={() => handleSelectUser(user)}
+                                        >
+                                            <span class="font-bold text-[var(--md-sys-color-on-surface)]">{user.name}</span>
+                                            <span class="text-xs font-bold text-[var(--md-sys-color-on-surface-variant)] bg-[var(--md-sys-color-surface-container-highest)] px-2.5 py-1 rounded-lg tracking-wide">
+                                                {user.role === 'admin' ? 'Admin' : 'User'}
+                                            </span>
+                                        </li>
+                                    )}
+                                </For>
+                                {suggestions().length === 0 && (
+                                    <li class="px-5 py-6 text-sm text-[var(--md-sys-color-on-surface-variant)] text-center font-medium">
+                                        No matching customers found
+                                    </li>
+                                )}
+                            </ul>
+                        )}
+                        <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-text-dim">
+                            <Search size={18} />
+                        </div>
+                    </div>
                 </div>
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-widest text-text-dim mb-2">{t('from')}</label>

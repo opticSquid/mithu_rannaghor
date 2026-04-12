@@ -4,28 +4,29 @@ import { User } from '../types';
 import { Plus, Search, Wallet as WalletIcon } from 'lucide-solid';
 import { useI18n } from '../i18n';
 
+import { globalUsers, globalUserTrie, loadUsers, appendNewUser, updateUserBalance } from '../store/userStore';
+
 const Customers = () => {
     const { t } = useI18n();
-    const [users, setUsers] = createSignal<User[]>([]);
     const [searchTerm, setSearchTerm] = createSignal('');
     const [showAddModal, setShowAddModal] = createSignal(false);
     const [showRechargeModal, setShowRechargeModal] = createSignal<User | null>(null);
 
-    const fetchUsers = async () => {
-        try {
-            const res = await axios.get('/api/users');
-            setUsers(res.data || []);
-        } catch (err) {
-            console.error(err);
+    onMount(loadUsers);
+
+    const filteredUsers = () => {
+        const term = searchTerm().trim();
+        if (!term) return globalUsers();
+        
+        const isNumeric = /^[0-9+\s]+$/.test(term);
+        
+        if (isNumeric) {
+            const stripped = term.replace(/\s+/g, '');
+            return globalUsers().filter(u => u.mobile_no.includes(stripped));
+        } else {
+            return globalUserTrie().search(term, 1000); // Higher limit for grid view
         }
     };
-
-    onMount(fetchUsers);
-
-    const filteredUsers = () => users().filter(u =>
-        u.name.toLowerCase().includes(searchTerm().toLowerCase()) ||
-        u.mobile_no.includes(searchTerm())
-    );
 
     return (
         <div class="space-y-8 animate-in slide-in-from-bottom duration-500">
@@ -99,14 +100,17 @@ const Customers = () => {
             {/* Add User Modal */}
             {showAddModal() && (
                 <Modal title={t('addNewCustomer')} onClose={() => setShowAddModal(false)}>
-                    <AddUserForm onSuccess={() => { setShowAddModal(false); fetchUsers(); }} />
+                    <AddUserForm onSuccess={(user) => { setShowAddModal(false); appendNewUser(user); }} />
                 </Modal>
             )}
 
             {/* Recharge Modal */}
             {showRechargeModal() && (
                 <Modal title={`${t('rechargeWallet')}: ${showRechargeModal()?.name}`} onClose={() => setShowRechargeModal(null)}>
-                    <RechargeForm user={showRechargeModal()!} onSuccess={() => { setShowRechargeModal(null); fetchUsers(); }} />
+                    <RechargeForm user={showRechargeModal()!} onSuccess={(newBalance) => { 
+                        updateUserBalance(showRechargeModal()!.user_id, newBalance);
+                        setShowRechargeModal(null); 
+                    }} />
                 </Modal>
             )}
         </div>
@@ -125,7 +129,7 @@ const Modal = (props: { title: string; children: any; onClose: () => void }) => 
     </div>
 );
 
-const AddUserForm = (props: { onSuccess: () => void }) => {
+const AddUserForm = (props: { onSuccess: (user: User) => void }) => {
     const { t } = useI18n();
     const [formData, setFormData] = createSignal({
         name: '',
@@ -138,8 +142,8 @@ const AddUserForm = (props: { onSuccess: () => void }) => {
     const handleSubmit = async (e: Event) => {
         e.preventDefault();
         try {
-            await axios.post('/api/users', formData());
-            props.onSuccess();
+            const res = await axios.post('/api/users', formData());
+            props.onSuccess(res.data);
         } catch (err) {
             alert('Failed to add customer');
         }
@@ -196,7 +200,7 @@ const AddUserForm = (props: { onSuccess: () => void }) => {
     );
 };
 
-const RechargeForm = (props: { user: User; onSuccess: () => void }) => {
+const RechargeForm = (props: { user: User; onSuccess: (newBalance: number) => void }) => {
     const { t } = useI18n();
     const [amount, setAmount] = createSignal('');
     const [refId, setRefId] = createSignal('');
@@ -220,13 +224,13 @@ const RechargeForm = (props: { user: User; onSuccess: () => void }) => {
             // Convert datetime-local value to ISO timestamp
             const timestamp = new Date(txnDateTime()).toISOString();
 
-            await axios.post('/api/wallet/recharge', {
+            const res = await axios.post('/api/wallet/recharge', {
                 user_id: props.user.user_id,
                 amount: parseFloat(amount()),
                 ref_id: refId(),
                 txn_date: timestamp
             });
-            props.onSuccess();
+            props.onSuccess(res.data.new_balance);
         } catch (err) {
             alert('Failed to recharge');
         }

@@ -73,7 +73,9 @@ func CreateDailyEntry(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tx.Commit(r.Context())
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(map[string]interface{}{"new_balance": newBalance})
 }
 
 func DeleteDailyEntry(w http.ResponseWriter, r *http.Request) {
@@ -125,7 +127,9 @@ func DeleteDailyEntry(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tx.Commit(r.Context())
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]interface{}{"new_balance": newBalance})
 }
 
 func UpdateDailyEntry(w http.ResponseWriter, r *http.Request) {
@@ -181,8 +185,8 @@ func UpdateDailyEntry(w http.ResponseWriter, r *http.Request) {
 
 	// Adjust Wallet
 	costDiff := newTotalCost - oldTotalCost
+	var newBalance float64
 	if costDiff != 0 {
-		var newBalance float64
 		// If diff is positive (cost increased), we subtract more from balance.
 		// If diff is negative (cost decreased), we subtracting a negative number adds to balance.
 		err = tx.QueryRow(r.Context(), `
@@ -211,8 +215,25 @@ func UpdateDailyEntry(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// If cost didn't change, we still need to return the old balance (which didn't change)
+	// We can query the balance or just use the oldBalance value, but oldBalance isn't fetched, oldTotalCost is.
+	// Oh wait, if costDiff == 0, newBalance isn't calculated above! 
+	// Let's refactor this section safely string.
+	var finalBalance float64
+	if costDiff != 0 {
+		finalBalance = newBalance
+	} else {
+		err = tx.QueryRow(r.Context(), `SELECT BALANCE FROM WALLET WHERE USER_ID = $1`, userID).Scan(&finalBalance)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
 	tx.Commit(r.Context())
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]interface{}{"new_balance": finalBalance})
 }
 
 func GetDailyEntries(w http.ResponseWriter, r *http.Request) {
