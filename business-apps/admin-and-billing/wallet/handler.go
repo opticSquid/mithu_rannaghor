@@ -50,6 +50,15 @@ func RechargeWallet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var newBalance float64
+	err = tx.QueryRow(r.Context(), `SELECT BALANCE FROM WALLET WHERE USER_ID = $1`, req.UserID).Scan(&newBalance)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	tx.Commit(r.Context())
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]interface{}{"new_balance": newBalance})
 }
