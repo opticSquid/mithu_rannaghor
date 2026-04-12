@@ -26,11 +26,10 @@ func GetBill(w http.ResponseWriter, r *http.Request) {
 	// Get User Info
 	dbPool := database.GetDbConn()
 	err := dbPool.QueryRow(r.Context(), `
-		SELECT u.USER_ID, u.NAME, u.MOBILE_NO, u.BUILDING_NO, u.ROOM_NO, u.ROLE, u.PLAN, w.BALANCE 
-		FROM USERS u 
-		LEFT JOIN WALLET w ON u.USER_ID = w.USER_ID 
+		SELECT u.USER_ID, u.NAME, u.MOBILE_NO, u.BUILDING_NO, u.ROOM_NO, u.ROLE, u.PLAN 
+		FROM USERS u
 		WHERE u.USER_ID = $1
-	`, userID).Scan(&report.User.UserID, &report.User.Name, &report.User.MobileNo, &report.User.BuildingNo, &report.User.RoomNo, &report.User.Role, &report.User.Plan, &report.User.Balance)
+	`, userID).Scan(&report.User.UserID, &report.User.Name, &report.User.MobileNo, &report.User.BuildingNo, &report.User.RoomNo, &report.User.Role, &report.User.Plan)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -60,8 +59,16 @@ func GetBill(w http.ResponseWriter, r *http.Request) {
 		report.TotalSpent += l.TotalCost
 	}
 
+	err = dbPool.QueryRow(r.Context(), `SELECT BALANCE_AFTER
+	FROM WALLET_TRANSACTIONS
+	WHERE USER_ID = $1
+	AND STATUS = 'confirmed'
+	AND CREATED_AT <= $2
+	ORDER BY CREATED_AT DESC
+	LIMIT 1`, userID, endDate).Scan(&report.ClosingBalance)
+
 	// Closing balance is current balance
-	report.ClosingBalance = report.User.Balance
+	report.User.Balance = report.ClosingBalance
 
 	// Calculate total recharges during billing period
 	dbPool.QueryRow(r.Context(), `
