@@ -116,7 +116,7 @@ func DeleteDailyEntry(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Log Transaction
+	// Log Wallet Transaction
 	_, err = tx.Exec(r.Context(), `
 		INSERT INTO WALLET_TRANSACTIONS (USER_ID, TXN_TYPE, STATUS, AMOUNT, BALANCE_AFTER) 
 		VALUES ($1, 'refund', 'confirmed', $2, $3)
