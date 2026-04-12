@@ -93,7 +93,8 @@ func DeleteDailyEntry(w http.ResponseWriter, r *http.Request) {
 	// Get info to refund
 	var userID int
 	var totalCost float64
-	err = tx.QueryRow(r.Context(), `SELECT USER_ID, TOTAL_COST FROM DAILY_LOGS WHERE LOG_ID = $1`, logID).Scan(&userID, &totalCost)
+	var logDate time.Time
+	err = tx.QueryRow(r.Context(), `SELECT USER_ID, TOTAL_COST, LOG_DATE FROM DAILY_LOGS WHERE LOG_ID = $1`, logID).Scan(&userID, &totalCost, &logDate)
 	if err != nil {
 		http.Error(w, "Entry not found", http.StatusNotFound)
 		return
@@ -117,10 +118,12 @@ func DeleteDailyEntry(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Log Wallet Transaction
+	now := time.Now()
+	createdAt := time.Date(logDate.Year(), logDate.Month(), logDate.Day(), now.Hour(), now.Minute(), now.Second(), now.Nanosecond(), logDate.Location())
 	_, err = tx.Exec(r.Context(), `
-		INSERT INTO WALLET_TRANSACTIONS (USER_ID, TXN_TYPE, STATUS, AMOUNT, BALANCE_AFTER) 
-		VALUES ($1, 'refund', 'confirmed', $2, $3)
-	`, userID, totalCost, newBalance)
+		INSERT INTO WALLET_TRANSACTIONS (USER_ID, TXN_TYPE, STATUS, AMOUNT, BALANCE_AFTER, CREATED_AT) 
+		VALUES ($1, 'refund', 'confirmed', $2, $3, $4)
+	`, userID, totalCost, newBalance, createdAt)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -217,7 +220,7 @@ func UpdateDailyEntry(w http.ResponseWriter, r *http.Request) {
 
 	// If cost didn't change, we still need to return the old balance (which didn't change)
 	// We can query the balance or just use the oldBalance value, but oldBalance isn't fetched, oldTotalCost is.
-	// Oh wait, if costDiff == 0, newBalance isn't calculated above! 
+	// Oh wait, if costDiff == 0, newBalance isn't calculated above!
 	// Let's refactor this section safely string.
 	var finalBalance float64
 	if costDiff != 0 {
