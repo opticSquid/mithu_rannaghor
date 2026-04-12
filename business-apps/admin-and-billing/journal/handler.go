@@ -115,6 +115,8 @@ func DeleteDailyEntry(w http.ResponseWriter, r *http.Request) {
 
 	// Log Wallet Transaction
 	now := time.Now()
+	// TODO: fix it
+	newBalance := 0
 	createdAt := time.Date(logDate.Year(), logDate.Month(), logDate.Day(), now.Hour(), now.Minute(), now.Second(), now.Nanosecond(), logDate.Location())
 	_, err = tx.Exec(r.Context(), `
 		INSERT INTO WALLET_TRANSACTIONS (USER_ID, TXN_TYPE, STATUS, AMOUNT, BALANCE_AFTER, CREATED_AT) 
